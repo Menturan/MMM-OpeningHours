@@ -54,7 +54,7 @@ Module.register('MMM-OpeningHours', {
     this.debugLog('Config: ', this.config)
     this.loaded = false
     moment.locale(config.language)
-    if (this.config.googleApiKey === undefined) {
+    if (this.config.googleApiKey === undefined || this.config.googleApiKey === "") {
       this.failure = this.translate('NO_API_KEY_PROVIDED')
       this.loaded = true
     } else if (this.config.stores.length === 0) {
