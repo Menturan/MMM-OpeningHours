@@ -1,0 +1,91 @@
+{
+  "html_attributions": [],
+  "result": {
+    "name": "MacDonalds",
+    "opening_hours": {
+      "open_now": false,
+      "periods": [
+        {
+          "close": {
+            "day": 1,
+            "time": "0200"
+          },
+          "open": {
+            "day": 0,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 2,
+            "time": "0200"
+          },
+          "open": {
+            "day": 1,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 3,
+            "time": "0200"
+          },
+          "open": {
+            "day": 2,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 4,
+            "time": "0200"
+          },
+          "open": {
+            "day": 3,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 5,
+            "time": "0200"
+          },
+          "open": {
+            "day": 4,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 6,
+            "time": "0200"
+          },
+          "open": {
+            "day": 5,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 0,
+            "time": "0200"
+          },
+          "open": {
+            "day": 6,
+            "time": "2000"
+          }
+        }
+      ],
+      "weekday_text": [
+        "måndag: 08:00–22:00",
+        "tisdag: 08:00–22:00",
+        "onsdag: 08:00–22:00",
+        "torsdag: 08:00–22:00",
+        "fredag: 08:00–22:00",
+        "lördag: 08:00–22:00",
+        "söndag: 08:00–22:00"
+      ]
+    }
+  },
+  "status": "OK"
+}

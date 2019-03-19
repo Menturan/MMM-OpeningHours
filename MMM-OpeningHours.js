@@ -1,6 +1,6 @@
 /*
  * Notifications:
- *      PLACES_UPDATE: Recived when places opening hours gets fetch/refetch.
+ *      STORES_UPDATE: Recived when STORES opening hours gets fetch/refetch.
  *      SERVICE_FAILURE: Received when the service access failed.
  */
 Module.register('MMM-OpeningHours', {
@@ -12,16 +12,27 @@ Module.register('MMM-OpeningHours', {
     timeFormat: config.timeFormat,
     language: config.language,
     styling: {
-      showHeader: true,
-      showTimeUntil: true
+      showTimeUntil: true,
+      textAlign: 'center',
+      size: 'small',
+      header: {
+        show: true,
+        size: 'xsmall',
+        textAlign: 'center',
+      }
     },
-    debug: true
+    debug: true,
+    mockData: false
   },
 
   getTranslations () {
-    return {
-      en: 'translations/en.json',
-      sv: 'translations/sv.json',
+    switch (this.config.language) {
+      case 'en':
+        return { en: 'translations/en.json' }
+      case 'sv':
+        return { sv: 'translations/sv.json' }
+      default:
+        return { en: 'translations/en.json' }
     }
   },
   // Required scripts
@@ -36,12 +47,13 @@ Module.register('MMM-OpeningHours', {
   // Start the module
   start: function () {
     Log.log('Starting module: ' + this.name)
-    this.debugLog("Config: ", this.config)
+    const userStyleHeader = this.config.styling.header
+    this.config.styling = { ...this.defaults.styling, ...this.config.styling }
+    this.config.styling.header = { ...this.defaults.styling.header, ...userStyleHeader }
+    this.debugLog('Default config: ', this.defaults)
+    this.debugLog('Config: ', this.config)
     this.loaded = false
-    moment.locale(this.config.language)
-    if (this.config.language === undefined || this.config.language === '') {
-      this.config.language = 'en'
-    }
+    moment.locale(config.language)
     if (this.config.googleApiKey === undefined) {
       this.failure = this.translate('NO_API_KEY_PROVIDED')
       this.loaded = true
@@ -56,10 +68,11 @@ Module.register('MMM-OpeningHours', {
   getDom: function () {
     var wrapper = document.createElement('div')
     wrapper.style = 'width: -moz-fit-content;'
-    if (this.config.styling.showHeader) {
+    if (this.config.styling.header.show) {
       var headerHtml = document.createElement('header')
       headerHtml.innerHTML = this.translate('HEADER')
-      headerHtml.style = 'margin-bottom: 5px;text-align: center;'
+      headerHtml.className = this.config.styling.header.size
+      headerHtml.style = 'text-align: ' + this.config.styling.header.textAlign + ';'
       wrapper.appendChild(headerHtml)
     }
     let container = document.createElement('div')
@@ -71,27 +84,73 @@ Module.register('MMM-OpeningHours', {
       container.innerHTML = this.failure
       container.className = 'dimmed light small'
     } else {
-      places.forEach(name => {
-        var p = document.createElement('p')
-        p.style = 'margin-top: 0px;margin-bottom: 0px;'
-        p.innerHTML = name
-        container.appendChild(p)
+      let table = document.createElement('table')
+      table.className = 'normal'
+      this.storeOpeningHours.forEach(store => {
+        let row = table.insertRow()
+        // Name
+        let nameCell = row.insertCell()
+        nameCell.innerHTML = store.name
+        nameCell.className = 'bright'
+        // Opening hours
+        let openCell = row.insertCell()
+        openCell.style = 'padding-left: 8px;'
+        let openCellTable = document.createElement('table')
+        const currentTime = this.config.mockData ? moment('20:00', 'HH:mm') : moment()
+        this.debugLog('Moment now: ', currentTime.format('HH:mm'))
+
+        // Is yesterdays opening hours still in place. (Open over midnight).
+        const openingHoursYesterday = store.opening_hours.periods[moment().weekday() - 1]
+        let closingTime = moment(openingHoursYesterday.close.time, 'HHmm').weekday(openingHoursYesterday.close.day)
+        let openingTime = moment(openingHoursYesterday.open.time, 'HHmm').weekday(openingHoursYesterday.open.day)
+        let storeIsOpen = currentTime.isBetween(openingTime, closingTime)
+
+        if (storeIsOpen === false) {
+          let openingHoursToday = store.opening_hours.periods[moment().weekday()]
+          closingTime = moment(openingHoursToday.close.time, 'HHmm').weekday(openingHoursToday.close.day)
+          openingTime = moment(openingHoursToday.open.time, 'HHmm').weekday(openingHoursToday.open.day)
+          storeIsOpen = currentTime.isBetween(openingTime, closingTime)
+        }
+        let openTextCell = openCellTable.insertRow()
+        openTextCell.innerHTML = storeIsOpen ? this.translate('OPEN') : this.translate('CLOSED')
+        openTextCell.className = 'xsmall'
+        openTextCell.style = storeIsOpen ? 'color: green;' : 'color: red;'
+        let openingHoursCell = openCellTable.insertRow()
+        openingHoursCell.className = 'xsmall'
+        if (this.config.styling.showTimeUntil) {
+          if (storeIsOpen) {
+            let timeUntilClosing = moment.duration(closingTime.diff(currentTime)).humanize()
+            openingHoursCell.innerHTML = this.translate('CLOSES_IN', { 'timeUntilClosing': timeUntilClosing })
+          } else {
+            let timeUntilOpen = moment.duration(currentTime.diff(openingTime)).humanize()
+            openingHoursCell.innerHTML = this.translate('OPENS_IN', { 'timeUntilOpen': timeUntilOpen })
+
+          }
+        } else {
+          if (storeIsOpen) {
+            openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + closingTime.format('HH:mm')
+          } else {
+            openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + openingTime.format('HH:mm')
+          }
+        }
+
+        openCell.appendChild(openCellTable)
       })
-      // container.innerHTML = places[0] + "</br>" + places[1];
-      container.className = 'bright small'
+      container.appendChild(table)
+      container.className = this.config.styling.size
     }
-    container.style = 'text-align: center;'
+    container.style = 'text-align: ' + this.config.styling.textAlign + ';'
     wrapper.appendChild(container)
     return wrapper
   },
 
   socketNotificationReceived: function (notification, payload) {
     this.debugLog('Notification - ', notification)
-    if (notification === 'PLACES_UPDATE') {
+    if (notification === 'STORES_UPDATE') {
       this.loaded = true
       this.failure = undefined
-      places = payload
-      this.debugLog('Places: ', places)
+      this.storeOpeningHours = payload
+      this.debugLog('Stores opening hours: ', this.storeOpeningHours[0])
       this.updateDom()
     }
     if (notification === 'SERVICE_FAILURE') {

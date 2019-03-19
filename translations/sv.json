@@ -2,5 +2,11 @@
   "HEADER": "Öppettider",
   "LOADING_MODULE": "Laddar öppettider...",
   "NO_API_KEY_PROVIDED": "API-nyckel fattas.",
-  "NO_STORES_PROVIDED": "Inga butiker tillagda."
+  "NO_STORES_PROVIDED": "Inga butiker tillagda.",
+  "CLOSED": "Stängt",
+  "CLOSES": "Stänger",
+  "OPEN": "Öppet",
+  "OPENS": "Öppnar",
+  "OPENS_IN": "Öppnar om {timeUntilOpen}",
+  "CLOSES_IN": "Stänger om {timeUntilClosing}"
 }
