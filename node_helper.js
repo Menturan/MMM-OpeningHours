@@ -62,15 +62,14 @@ module.exports = NodeHelper.create({
   getOpeningHours: function () {
     var self = this
     self.log('Fetching opening hours')
-    let opening_hours_promises = this.config.stores.map((store, index) => {
+    let opening_hours_promises = this.config.places.map((place, index) => {
       let googlePromise
       if (this.config.mockData) {
         googlePromise = self.mockGooglePlacesApi(self, index)
       } else {
         self.log('Using Google Places API.')
         googlePromise = googleClient.place({
-          placeid: store,
-          language: this.config.language,
+          placeid: place,
           fields: ['name', 'opening_hours'],
         }).asPromise()
       }
@@ -87,8 +86,8 @@ module.exports = NodeHelper.create({
 
     Promise.all(opening_hours_promises).then(function (result) {
       self.debugLog('Sending to frontend - ', result)
-      this.stores = result
-      self.sendSocketNotification('STORES_UPDATE', result)
+      this.places = result
+      self.sendSocketNotification('PLACES_UPDATE', result)
     })
 
   },
@@ -107,7 +106,8 @@ module.exports = NodeHelper.create({
           moment.locale(this.config.language)
           googleClient = google.createClient({
             key: this.config.googleApiKey,
-            Promise: Promise
+            Promise: Promise,
+            language: this.config.language
           })
           self.scheduleUpdate()
         }
@@ -115,7 +115,7 @@ module.exports = NodeHelper.create({
       this.started = true
       self.getOpeningHours()
     } else {
-      self.sendSocketNotification('STORES_UPDATE', this.stores)
+      self.sendSocketNotification('PLACES_UPDATE', this.places)
     }
 
   }

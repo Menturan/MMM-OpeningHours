@@ -1,13 +1,13 @@
 /*
  * Notifications:
- *      STORES_UPDATE: Recived when STORES opening hours gets fetch/refetch.
+ *      PLACES_UPDATE: Received when places opening hours gets fetch/refetch.
  *      SERVICE_FAILURE: Received when the service access failed.
  */
 Module.register('MMM-OpeningHours', {
   // Module defaults
   defaults: {
     googleApiKey: undefined,
-    stores: [],
+    places: [],
     scheduleTime: 60000 * 60 * 24,
     timeFormat: config.timeFormat,
     language: config.language,
@@ -57,8 +57,8 @@ Module.register('MMM-OpeningHours', {
     if (this.config.googleApiKey === undefined || this.config.googleApiKey === "") {
       this.failure = this.translate('NO_API_KEY_PROVIDED')
       this.loaded = true
-    } else if (this.config.stores.length === 0) {
-      this.failure = this.translate('NO_STORES_PROVIDED')
+    } else if (this.config.places.length === 0) {
+      this.failure = this.translate('NO_PLACES_PROVIDED')
       this.loaded = true
     } else {
       this.sendSocketNotification('SETUP', this.config) // Send config to helper and initiate an update
@@ -86,11 +86,11 @@ Module.register('MMM-OpeningHours', {
     } else {
       let table = document.createElement('table')
       table.className = 'normal'
-      this.storeOpeningHours.forEach(store => {
+      this.placesOpeningHours.forEach(place => {
         let row = table.insertRow()
         // Name
         let nameCell = row.insertCell()
-        nameCell.innerHTML = store.name
+        nameCell.innerHTML = place.name
         nameCell.className = 'bright'
         // Opening hours
         let openCell = row.insertCell()
@@ -100,25 +100,25 @@ Module.register('MMM-OpeningHours', {
         this.debugLog('Moment now: ', currentTime.format('HH:mm'))
 
         // Is yesterdays opening hours still in place. (Open over midnight).
-        const openingHoursYesterday = store.opening_hours.periods[moment().weekday() - 1]
+        const openingHoursYesterday = place.opening_hours.periods[moment().weekday() - 1]
         let closingTime = moment(openingHoursYesterday.close.time, 'HHmm').weekday(openingHoursYesterday.close.day)
         let openingTime = moment(openingHoursYesterday.open.time, 'HHmm').weekday(openingHoursYesterday.open.day)
-        let storeIsOpen = currentTime.isBetween(openingTime, closingTime)
+        let placeIsOpen = currentTime.isBetween(openingTime, closingTime)
 
-        if (storeIsOpen === false) {
-          let openingHoursToday = store.opening_hours.periods[moment().weekday()]
+        if (placeIsOpen === false) {
+          let openingHoursToday = place.opening_hours.periods[moment().weekday()]
           closingTime = moment(openingHoursToday.close.time, 'HHmm').weekday(openingHoursToday.close.day)
           openingTime = moment(openingHoursToday.open.time, 'HHmm').weekday(openingHoursToday.open.day)
-          storeIsOpen = currentTime.isBetween(openingTime, closingTime)
+          placeIsOpen = currentTime.isBetween(openingTime, closingTime)
         }
         let openTextCell = openCellTable.insertRow()
-        openTextCell.innerHTML = storeIsOpen ? this.translate('OPEN') : this.translate('CLOSED')
+        openTextCell.innerHTML = placeIsOpen ? this.translate('OPEN') : this.translate('CLOSED')
         openTextCell.className = 'xsmall'
-        openTextCell.style = storeIsOpen ? 'color: green;' : 'color: red;'
+        openTextCell.style = placeIsOpen ? 'color: green;' : 'color: red;'
         let openingHoursCell = openCellTable.insertRow()
         openingHoursCell.className = 'xsmall'
         if (this.config.styling.showTimeUntil) {
-          if (storeIsOpen) {
+          if (placeIsOpen) {
             let timeUntilClosing = moment.duration(closingTime.diff(currentTime)).humanize()
             openingHoursCell.innerHTML = this.translate('CLOSES_IN', { 'timeUntilClosing': timeUntilClosing })
           } else {
@@ -127,7 +127,7 @@ Module.register('MMM-OpeningHours', {
 
           }
         } else {
-          if (storeIsOpen) {
+          if (placeIsOpen) {
             openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + closingTime.format('HH:mm')
           } else {
             openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + openingTime.format('HH:mm')
@@ -146,11 +146,11 @@ Module.register('MMM-OpeningHours', {
 
   socketNotificationReceived: function (notification, payload) {
     this.debugLog('Notification - ', notification)
-    if (notification === 'STORES_UPDATE') {
+    if (notification === 'PLACES_UPDATE') {
       this.loaded = true
       this.failure = undefined
-      this.storeOpeningHours = payload
-      this.debugLog('Stores opening hours: ', this.storeOpeningHours[0])
+      this.placesOpeningHours = payload
+      this.debugLog('Places opening hours: ', this.placesOpeningHours[0])
       this.updateDom()
     }
     if (notification === 'SERVICE_FAILURE') {

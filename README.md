@@ -32,7 +32,7 @@ Search for the place to get its ID. You really needs to **search** for a place. 
 | Key          | Value             | Required | Default           | Description                                                                                                                                                                                             |
 |--------------|-------------------|----------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | googleApiKey | _string_          | Yes      | N/A               | Your Google Places API Key.                                                                                                                                                                             |
-| stores       | _place id_        | Yes      | N/A               | List of place ids. [See above.](#find-places-id)                                                                                                                                                        |
+| places       | _place id_        | Yes      | N/A               | List of place ids. [See above.](#find-places-id)                                                                                                                                                        |
 | scheduleTime | _milliseconds_    | No       | 86400000 (24h)    | Time between fetching place data from Google.                                                                                                                                                           |
 | timeFormat   | _number_          | No       | config.timeFormat | 24h, 12h. If not specified, uses same as parent config.                                                                                                                                                 |
 | language     | _ISO 639-1  code_ | No       | config.language   | Changes the translation. Time and date is still locale. Two letter country code. [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). If not specified, uses same as parent config. |
@@ -65,7 +65,7 @@ Search for the place to get its ID. You really needs to **search** for a place. 
     position: "bottom_right",
     config: {
     googleApiKey: "XXXXXXXXXXXXXX",
-        stores: ["xxxxxxxx", "yyyyyyyy"],
+        places: ["xxxxxxxx", "yyyyyyyy"],
         styling: {
           size: 'small',
           header: {
