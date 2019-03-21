@@ -54,7 +54,7 @@ Module.register('MMM-OpeningHours', {
     this.debugLog('Config: ', this.config)
     this.loaded = false
     moment.locale(config.language)
-    if (this.config.googleApiKey === undefined || this.config.googleApiKey === "") {
+    if (this.config.googleApiKey === undefined || this.config.googleApiKey === '') {
       this.failure = this.translate('NO_API_KEY_PROVIDED')
       this.loaded = true
     } else if (this.config.places.length === 0) {
@@ -63,6 +63,12 @@ Module.register('MMM-OpeningHours', {
     } else {
       this.sendSocketNotification('SETUP', this.config) // Send config to helper and initiate an update
     }
+
+    // Schedule update interval for ui.
+    var self = this
+    setInterval(function () {
+      self.updateDom()
+    }, 1000 * 60) // 1min
   },
 
   getDom: function () {
