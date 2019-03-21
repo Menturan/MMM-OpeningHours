@@ -5,8 +5,6 @@ var fs = require('fs')
 
 var googleClient = undefined
 
-const OVER_QUERY_LIMIT = 'OVER_QUERY_LIMIT'
-
 module.exports = NodeHelper.create({
 
   start: function () {
