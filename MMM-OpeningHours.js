@@ -14,12 +14,7 @@ Module.register('MMM-OpeningHours', {
     styling: {
       showTimeUntil: true,
       textAlign: 'center',
-      size: 'small',
-      header: {
-        show: true,
-        size: 'xsmall',
-        textAlign: 'center',
-      }
+      size: 'small'
     },
     debug: true,
     mockData: false
@@ -47,9 +42,7 @@ Module.register('MMM-OpeningHours', {
   // Start the module
   start: function () {
     Log.log('Starting module: ' + this.name)
-    const userStyleHeader = this.config.styling.header
     this.config.styling = { ...this.defaults.styling, ...this.config.styling }
-    this.config.styling.header = { ...this.defaults.styling.header, ...userStyleHeader }
     this.debugLog('Default config: ', this.defaults)
     this.debugLog('Config: ', this.config)
     this.loaded = false
@@ -71,16 +64,13 @@ Module.register('MMM-OpeningHours', {
     }, 1000 * 60) // 1min
   },
 
+  getHeader: function () {
+    return this.data.header;
+  },
+
   getDom: function () {
     var wrapper = document.createElement('div')
     wrapper.style = 'width: -moz-fit-content;'
-    if (this.config.styling.header.show) {
-      var headerHtml = document.createElement('header')
-      headerHtml.innerHTML = this.translate('HEADER')
-      headerHtml.className = this.config.styling.header.size
-      headerHtml.style = 'text-align: ' + this.config.styling.header.textAlign + ';'
-      wrapper.appendChild(headerHtml)
-    }
     let container = document.createElement('div')
 
     if (!this.loaded) {

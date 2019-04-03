@@ -59,14 +59,6 @@ Search for the place to get its ID. You really needs to **search** for a place. 
 | showTimeUntil | _boolean_ | No       | true            | Show time until close/open instead of time when closed/open.          |
 | textAlign     | _string_  | No       | center          | Table text alignment. Possible values: left, right, center.           |
 | size          | _string_  | No       | small           | Size of table. Possible values: xsmall, small, medium. large, xlarge. |
-| header        | _object_  | No       | See next table. | Configure header style.                                               |
-
-##### Header
-| Key       | Value     | Required | Default | Description                                                           |
-|-----------|-----------|----------|---------|-----------------------------------------------------------------------|
-| show      | _boolean_ | No       | true    | Show header.                                                          |
-| size      | _string_  | No       | xsmall  | Size of header. Possible values: xsmall, small, medium. large, xlarge |
-| textAlign | _string_  | No       | center  | Header text alignment. Possible values: left, right, center.          |
 
 
 ## Example config
@@ -75,14 +67,12 @@ Search for the place to get its ID. You really needs to **search** for a place. 
 {
     module: "MMM-OpeningHours",
     position: "bottom_right",
+    header: "Opening hours",
     config: {
     googleApiKey: "XXXXXXXXXXXXXX",
         places: ["xxxxxxxx", "yyyyyyyy"],
         styling: {
-          size: 'small',
-          header: {
-            size: 'xsmall',
-          }
+          size: 'small'
         }
     }
 }
