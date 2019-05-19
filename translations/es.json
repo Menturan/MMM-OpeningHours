@@ -1,0 +1,12 @@
+{
+  "HEADER": "Horarios",
+  "LOADING_MODULE": "Cargando horarios...",
+  "NO_API_KEY_PROVIDED": "No se ha proporcionado ninguna clave para la API",
+  "NO_PLACES_PROVIDED": "No se han especificado lugares",
+  "CLOSED": "Cerrado",
+  "CLOSES": "Cierra",
+  "OPEN": "Abierto",
+  "OPENS": "Abre",
+  "OPENS_IN": "Abre en {timeUntilOpen}",
+  "CLOSES_IN": "Cierra en {timeUntilClosing}"
+}
