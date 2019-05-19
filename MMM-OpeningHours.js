@@ -26,6 +26,8 @@ Module.register('MMM-OpeningHours', {
         return { en: 'translations/en.json' }
       case 'sv':
         return { sv: 'translations/sv.json' }
+      case 'es':
+        return { es: 'translations/es.json' }
       default:
         return { en: 'translations/en.json' }
     }
