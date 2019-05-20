@@ -68,7 +68,7 @@ module.exports = NodeHelper.create({
         self.log('Using Google Places API.')
         googlePromise = googleClient.place({
           placeid: place,
-          fields: ['name', 'opening_hours'],
+          fields: ['name', 'opening_hours', 'place_id'],
         }).asPromise()
       }
       self.debugLog('googlePromise - ', googlePromise)

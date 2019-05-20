@@ -9,5 +9,6 @@
   "OPENS": "Öppnar",
   "OPENS_IN": "Öppnar om {timeUntilOpen}",
   "CLOSES_IN": "Stänger om {timeUntilClosing}",
-  "NOT_AVAILABLE": "N/A"
+  "NOT_AVAILABLE": "N/A",
+  "ALWAYS_OPEN": "Dygnet runt"
 }

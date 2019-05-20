@@ -70,6 +70,12 @@ Module.register('MMM-OpeningHours', {
     return this.data.header
   },
 
+  isAlwaysOpen: function (place) {
+    // See note in docs. opening_hours -> periods -> close: https://developers.google.com/places/web-service/details#PlaceDetailsResults
+    const firstPeriod = place.opening_hours.periods[0]
+    return firstPeriod.open.day === 0 && firstPeriod.open.time === '0000' && firstPeriod.close === undefined
+  },
+
   getDom: function () {
     var wrapper = document.createElement('div')
     wrapper.style = 'width: -moz-fit-content;'
@@ -85,6 +91,8 @@ Module.register('MMM-OpeningHours', {
       let table = document.createElement('table')
       table.className = 'normal'
       this.placesOpeningHours.forEach(place => {
+        this.debugLog('Place name: ', place.name)
+        this.debugLog('Place id: ', place.place_id)
         let row = table.insertRow()
         // Name
         let nameCell = row.insertCell()
@@ -95,54 +103,57 @@ Module.register('MMM-OpeningHours', {
         let openCell = row.insertCell()
         openCell.style = 'padding-left: 8px;'
         if (place.opening_hours !== undefined) {
-          let openCellTable = document.createElement('table')
-          const currentTime = this.config.mockData ? moment('20:00', 'HH:mm') : moment()
-          this.debugLog('Moment now: ', currentTime.format('HH:mm'))
+          if (!this.isAlwaysOpen(place)) {
+            let openCellTable = document.createElement('table')
+            const currentTime = this.config.mockData ? moment('20:00', 'HH:mm') : moment()
+            this.debugLog('Moment now: ', currentTime.format('HH:mm'))
 
-          // Is yesterdays opening hours still in place. (Open over midnight).
-          const openingHoursYesterday = place.opening_hours.periods[moment().weekday() - 1]
-          let closingTime = moment(openingHoursYesterday.close.time, 'HHmm').weekday(openingHoursYesterday.close.day)
-          let openingTime = moment(openingHoursYesterday.open.time, 'HHmm').weekday(openingHoursYesterday.open.day)
-          let placeIsOpen = currentTime.isBetween(openingTime, closingTime)
+            // Is yesterdays opening hours still in place. (Open over midnight).
+            const openingHoursYesterday = place.opening_hours.periods[moment().weekday() - 1]
+            let closingTime = moment(openingHoursYesterday.close.time, 'HHmm').weekday(openingHoursYesterday.close.day)
+            let openingTime = moment(openingHoursYesterday.open.time, 'HHmm').weekday(openingHoursYesterday.open.day)
+            let placeIsOpen = currentTime.isBetween(openingTime, closingTime)
 
-          if (placeIsOpen === false) {
-            let openingHoursToday = place.opening_hours.periods[moment().weekday()]
-            closingTime = moment(openingHoursToday.close.time, 'HHmm').weekday(openingHoursToday.close.day)
-            openingTime = moment(openingHoursToday.open.time, 'HHmm').weekday(openingHoursToday.open.day)
-            placeIsOpen = currentTime.isBetween(openingTime, closingTime)
-          }
-
-          // Text
-          let openTextCell = openCellTable.insertRow()
-          openTextCell.innerHTML = placeIsOpen ? this.translate('OPEN') : this.translate('CLOSED')
-          openTextCell.className = 'xsmall'
-          openTextCell.style = placeIsOpen ? 'color: green;' : 'color: red;'
-
-          // Hours
-          let openingHoursCell = openCellTable.insertRow()
-          openingHoursCell.className = 'xsmall'
-          // Show time until closing/opening
-          if (this.config.styling.showTimeUntil) {
-            if (placeIsOpen) {
-              let timeUntilClosing = moment.duration(closingTime.diff(currentTime)).humanize()
-              openingHoursCell.innerHTML = this.translate('CLOSES_IN', { 'timeUntilClosing': timeUntilClosing })
-            } else {
-              let timeUntilOpen = moment.duration(currentTime.diff(openingTime)).humanize()
-              openingHoursCell.innerHTML = this.translate('OPENS_IN', { 'timeUntilOpen': timeUntilOpen })
-
+            if (placeIsOpen === false) {
+              let openingHoursToday = place.opening_hours.periods[moment().weekday()]
+              closingTime = moment(openingHoursToday.close.time, 'HHmm').weekday(openingHoursToday.close.day)
+              openingTime = moment(openingHoursToday.open.time, 'HHmm').weekday(openingHoursToday.open.day)
+              placeIsOpen = currentTime.isBetween(openingTime, closingTime)
             }
-            // Show only time when closing/opening
+
+            // Text
+            let openTextCell = openCellTable.insertRow()
+            openTextCell.innerHTML = placeIsOpen ? this.translate('OPEN') : this.translate('CLOSED')
+            openTextCell.className = 'xsmall'
+            openTextCell.style = placeIsOpen ? 'color: green;' : 'color: red;'
+
+            // Hours
+            let openingHoursCell = openCellTable.insertRow()
+            openingHoursCell.className = 'xsmall'
+            // Show time until closing/opening
+            if (this.config.styling.showTimeUntil) {
+              if (placeIsOpen) {
+                let timeUntilClosing = moment.duration(closingTime.diff(currentTime)).humanize()
+                openingHoursCell.innerHTML = this.translate('CLOSES_IN', { 'timeUntilClosing': timeUntilClosing })
+              } else {
+                let timeUntilOpen = moment.duration(currentTime.diff(openingTime)).humanize()
+                openingHoursCell.innerHTML = this.translate('OPENS_IN', { 'timeUntilOpen': timeUntilOpen })
+
+              }
+              // Show only time when closing/opening
+            } else {
+              if (placeIsOpen) {
+                openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + closingTime.format('HH:mm')
+              } else {
+                openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + openingTime.format('HH:mm')
+              }
+            }
+
+            openCell.appendChild(openCellTable)
           } else {
-            if (placeIsOpen) {
-              openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + closingTime.format('HH:mm')
-            } else {
-              openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + openingTime.format('HH:mm')
-            }
+            openCell.innerHTML = this.translate('ALWAYS_OPEN')
           }
-
-          openCell.appendChild(openCellTable)
         } else {
-          let nameCell = row.insertCell()
           openCell.innerHTML = this.translate('NOT_AVAILABLE')
         }
       })
