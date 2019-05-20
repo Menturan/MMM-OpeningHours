@@ -73,8 +73,8 @@ module.exports = NodeHelper.create({
       }
       self.debugLog('googlePromise - ', googlePromise)
       return googlePromise.then(function (response) {
-        self.debugLog('Response - ', response)
-        self.debugLog('Response.json.result - ', response.json.result)
+        self.debugLog('Response - ', JSON.stringify(response))
+        // self.debugLog('Response.json.result - ', response.json.result)
         return response.json.result
       }).catch(function (error) {
         self.log(': Error: ', error)
@@ -83,8 +83,8 @@ module.exports = NodeHelper.create({
     })
 
     Promise.all(opening_hours_promises).then(function (result) {
-      self.debugLog('Sending to frontend - ', result)
       this.places = result
+      self.debugLog('Sending to frontend - ', JSON.stringify(this.places))
       self.sendSocketNotification('PLACES_UPDATE', result)
     })
 

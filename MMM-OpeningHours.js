@@ -148,7 +148,6 @@ Module.register('MMM-OpeningHours', {
       this.loaded = true
       this.failure = undefined
       this.placesOpeningHours = payload
-      this.debugLog('Places opening hours: ', this.placesOpeningHours[0])
       this.updateDom()
     }
     if (notification === 'SERVICE_FAILURE') {
