@@ -8,5 +8,6 @@
   "OPEN": "Open",
   "OPENS": "Opens",
   "OPENS_IN": "Opens in {timeUntilOpen}",
-  "CLOSES_IN": "Closes in {timeUntilClosing}"
+  "CLOSES_IN": "Closes in {timeUntilClosing}",
+  "NOT_AVAILABLE": "N/A"
 }

@@ -8,5 +8,6 @@
   "OPEN": "Öppet",
   "OPENS": "Öppnar",
   "OPENS_IN": "Öppnar om {timeUntilOpen}",
-  "CLOSES_IN": "Stänger om {timeUntilClosing}"
+  "CLOSES_IN": "Stänger om {timeUntilClosing}",
+  "NOT_AVAILABLE": "N/A"
 }
