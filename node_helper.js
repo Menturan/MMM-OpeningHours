@@ -43,11 +43,24 @@ module.exports = NodeHelper.create({
     self.log('Using mock data.')
     return new Promise(function (resolve, reject) {
       let file = ''
-      if (index === 0) {
-        file = './modules/MMM-OpeningHours/mock_data/burger_king.json'
-      } else {
-        file = './modules/MMM-OpeningHours/mock_data/macDonalds.json'
+      switch (index) {
+        case 0:
+          file = './modules/MMM-OpeningHours/mock_data/normal.json'
+          break;
+        case 1:
+          file = './modules/MMM-OpeningHours/mock_data/24hour.json'
+          break;
+        case 2:
+          file = './modules/MMM-OpeningHours/mock_data/closed_mon_sun.json'
+          break;
+        case 3:
+          file = './modules/MMM-OpeningHours/mock_data/open_eve_til_night.json'
+          break;
+        case 4:
+          file = './modules/MMM-OpeningHours/mock_data/no_opening_hours.json'
+          break;
       }
+
       fs.readFile(file, 'utf8', function (err, data) {
         if (err != null) {
           reject(err)

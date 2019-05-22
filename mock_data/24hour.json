@@ -1,18 +1,18 @@
 {
-  "html_attributions": [],
-  "result": {
-    "name": "24/7 Gas Station",
-    "opening_hours": {
-      "open_now": true,
-      "periods": [
+  "html_attributions" : [],
+  "result" : {
+    "name" : "24-hour store",
+    "opening_hours" : {
+      "open_now" : true,
+      "periods" : [
         {
-          "open": {
-            "day": 0,
-            "time": "0000"
+          "open" : {
+            "day" : 0,
+            "time" : "0000"
           }
         }
       ],
-      "weekday_text": [
+      "weekday_text" : [
         "måndag: Öppet dygnet runt",
         "tisdag: Öppet dygnet runt",
         "onsdag: Öppet dygnet runt",
@@ -21,7 +21,8 @@
         "lördag: Öppet dygnet runt",
         "söndag: Öppet dygnet runt"
       ]
-    }
+    },
+    "place_id" : "uber-id"
   },
-  "status": "OK"
+  "status" : "OK"
 }

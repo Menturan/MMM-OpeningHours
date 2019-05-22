@@ -1,78 +1,78 @@
 {
   "html_attributions": [],
   "result": {
-    "name": "Burger King",
+    "name": "Eve til Night",
     "opening_hours": {
-      "open_now": true,
+      "open_now": false,
       "periods": [
         {
           "close": {
-            "day": 0,
-            "time": "0800"
+            "day": 1,
+            "time": "0200"
           },
           "open": {
             "day": 0,
-            "time": "2200"
-          }
-        },
-        {
-          "close": {
-            "day": 1,
-            "time": "0800"
-          },
-          "open": {
-            "day": 1,
-            "time": "2200"
+            "time": "2000"
           }
         },
         {
           "close": {
             "day": 2,
-            "time": "0800"
+            "time": "0200"
+          },
+          "open": {
+            "day": 1,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 3,
+            "time": "0200"
           },
           "open": {
             "day": 2,
-            "time": "2200"
-          }
-        },
-        {
-          "close": {
-            "day": 3,
-            "time": "0800"
-          },
-          "open": {
-            "day": 3,
-            "time": "2200"
+            "time": "2000"
           }
         },
         {
           "close": {
             "day": 4,
-            "time": "0800"
+            "time": "0200"
+          },
+          "open": {
+            "day": 3,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 5,
+            "time": "0200"
           },
           "open": {
             "day": 4,
-            "time": "2200"
-          }
-        },
-        {
-          "close": {
-            "day": 5,
-            "time": "0800"
-          },
-          "open": {
-            "day": 5,
-            "time": "2200"
+            "time": "2000"
           }
         },
         {
           "close": {
             "day": 6,
-            "time": "0800"
+            "time": "0200"
+          },
+          "open": {
+            "day": 5,
+            "time": "2000"
+          }
+        },
+        {
+          "close": {
+            "day": 0,
+            "time": "0200"
           },
           "open": {
             "day": 6,
-            "time": "2200"
+            "time": "2000"
           }
         }
       ],
