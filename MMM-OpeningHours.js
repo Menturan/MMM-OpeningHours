@@ -85,12 +85,21 @@ Module.register('MMM-OpeningHours', {
     let res = {}
     periods.forEach(period => {
       let p = {}
-      p.close = moment(period.close.time, 'HHmm').weekday(period.close.day).local(true)
-      p.open = moment(period.open.time, 'HHmm').weekday(period.open.day).local(true)
+      p.close = moment(period.close.time, 'HHmm').weekday(period.close.day)
+      p.open = moment(period.open.time, 'HHmm').weekday(period.open.day)
       res[period.open.day] = p
     })
     this.debugLog('Periods parsed: ', JSON.stringify(res))
     return res
+  },
+
+  getNextOpenDay: function (opening_hours, startDay) {
+    for (let i = 1; i < 7; i++) {
+      const nextOpenDay = opening_hours[moment().weekday(startDay+i)]
+      if (nextOpenDay !== undefined){
+        return nextOpenDay
+      }
+    }
   },
 
   getDom: function () {
@@ -149,11 +158,17 @@ Module.register('MMM-OpeningHours', {
             placeIsOpen = currentTime.isBetween(openingTime, closingTime)
           }
 
-          if (placeIsOpen === false) {
-            let openingHoursToday = opening_hours[moment().weekday()]
-            closingTime = openingHoursToday.close
-            openingTime = openingHoursToday.open
-            placeIsOpen = currentTime.isBetween(openingTime, closingTime)
+          if (opening_hours[moment().weekday()] !== undefined) {
+
+            if (placeIsOpen === false) {
+              let openingHoursToday = opening_hours[moment().weekday()]
+              closingTime = openingHoursToday.close
+              openingTime = openingHoursToday.open
+              placeIsOpen = currentTime.isBetween(openingTime, closingTime)
+            }
+          } else {
+            const nextOpenDay = this.getNextOpenDay(opening_hours, moment().weekday())
+            openingTime = nextOpenDay.open
           }
 
           // Text
