@@ -3,6 +3,8 @@
  *      PLACES_UPDATE: Received when places opening hours gets fetch/refetch.
  *      SERVICE_FAILURE: Received when the service access failed.
  */
+import { getNextOpenDay, parse_opening_hours } from './Util'
+
 Module.register('MMM-OpeningHours', {
   // Module defaults
   defaults: {
@@ -45,8 +47,8 @@ Module.register('MMM-OpeningHours', {
   start: function () {
     Log.log('Starting module: ' + this.name)
     this.config.styling = { ...this.defaults.styling, ...this.config.styling }
-    this.debugLog('Default config: ', this.defaults)
-    this.debugLog('Config: ', this.config)
+    debugLog('Default config: ', this.defaults)
+    debugLog('Config: ', this.config)
     this.loaded = false
     moment.locale(config.language)
     if (this.config.googleApiKey === undefined || this.config.googleApiKey === '') {
@@ -76,32 +78,6 @@ Module.register('MMM-OpeningHours', {
     return firstPeriod.open.day === 0 && firstPeriod.open.time === '0000' && firstPeriod.close === undefined
   },
 
-  parse_opening_hours: function (periods) {
-    /* Results in following structure
-    { 0: {close: moment(), open: moment()}
-      1: {close: moment(), open: moment()}
-      2: {close: moment(), open: moment()} }
-    */
-    let res = {}
-    periods.forEach(period => {
-      let p = {}
-      p.close = moment(period.close.time, 'HHmm').weekday(period.close.day)
-      p.open = moment(period.open.time, 'HHmm').weekday(period.open.day)
-      res[period.open.day] = p
-    })
-    this.debugLog('Periods parsed: ', JSON.stringify(res))
-    return res
-  },
-
-  getNextOpenDay: function (opening_hours, startDay) {
-    for (let i = 1; i < 7; i++) {
-      const nextOpenDay = opening_hours[moment().weekday(startDay+i)]
-      if (nextOpenDay !== undefined){
-        return nextOpenDay
-      }
-    }
-  },
-
   getDom: function () {
     var wrapper = document.createElement('div')
     wrapper.style = 'width: -moz-fit-content;'
@@ -127,8 +103,8 @@ Module.register('MMM-OpeningHours', {
     let table = document.createElement('table')
     table.className = 'normal'
     this.placesOpeningHours.forEach(place => {
-      this.debugLog('Place name: ', place.name)
-      this.debugLog('Place id: ', place.place_id)
+      debugLog('Place name: ', place.name)
+      debugLog('Place id: ', place.place_id)
       let row = table.insertRow()
       // Name
       let nameCell = row.insertCell()
@@ -142,9 +118,9 @@ Module.register('MMM-OpeningHours', {
         if (!this.isAlwaysOpen(place)) {
           let openCellTable = document.createElement('table')
           const currentTime = moment() // this.config.mockData ? moment('21:00', 'HH:mm') : moment()
-          this.debugLog('Moment now: ', currentTime.format('HH:mm'))
+          debugLog('Moment now: ', currentTime.format('HH:mm'))
 
-          const opening_hours = this.parse_opening_hours(place.opening_hours.periods)
+          const opening_hours = parse_opening_hours(place.opening_hours.periods)
           // Is yesterdays opening hours still in place. (Open over midnight).
           const openingHoursYesterday = opening_hours[moment().weekday() - 1]
           let closingTime = undefined
@@ -167,7 +143,7 @@ Module.register('MMM-OpeningHours', {
               placeIsOpen = currentTime.isBetween(openingTime, closingTime)
             }
           } else {
-            const nextOpenDay = this.getNextOpenDay(opening_hours, moment().weekday())
+            const nextOpenDay = getNextOpenDay(opening_hours, moment().weekday())
             openingTime = nextOpenDay.open
           }
 
@@ -215,7 +191,7 @@ Module.register('MMM-OpeningHours', {
   },
 
   socketNotificationReceived: function (notification, payload) {
-    this.debugLog('Notification - ', notification)
+    debugLog('Notification - ', notification)
     if (notification === 'PLACES_UPDATE') {
       this.loaded = true
       this.failure = undefined
@@ -229,19 +205,20 @@ Module.register('MMM-OpeningHours', {
       this.updateDom()
     }
   },
-
-  debugLog: function (msg, object) {
-    if (this.config.debug) {
-      Log.log(
-        '[' +
-        new Date(Date.now()).toLocaleTimeString() +
-        '] - DEBUG - ' +
-        this.name +
-        ' - ' +
-        new Error().lineNumber +
-        ' - : ' +
-        msg, object
-      )
-    }
-  }
 })
+
+function debugLog (msg, object) {
+  if (this.config.debug) {
+    Log.log(
+      '[' +
+      new Date(Date.now()).toLocaleTimeString() +
+      '] - DEBUG - ' +
+      this.name +
+      ' - ' +
+      new Error().lineNumber +
+      ' - : ' +
+      msg, object
+    )
+  }
+}
+
