@@ -1,13 +1,15 @@
-export function getNextOpenDay (opening_hours, startDay) {
+var moment = require('moment');
+
+function getNextOpenDay(opening_hours, startDay) {
   for (let i = 1; i < 7; i++) {
-    const nextOpenDay = opening_hours[moment().weekday(startDay + i)]
+    const nextOpenDay = opening_hours[moment().weekday(startDay + i).weekday()]
     if (nextOpenDay !== undefined) {
       return nextOpenDay
     }
   }
 }
 
-export function parse_opening_hours (periods) {
+function parse_opening_hours(periods) {
   /* Results in following structure
   { 0: {close: moment(), open: moment()}
     1: {close: moment(), open: moment()}
@@ -20,6 +22,7 @@ export function parse_opening_hours (periods) {
     p.open = moment(period.open.time, 'HHmm').weekday(period.open.day)
     res[period.open.day] = p
   })
-  debugLog('Periods parsed: ', JSON.stringify(res))
   return res
 }
+
+module.exports = {parse_opening_hours, getNextOpenDay};

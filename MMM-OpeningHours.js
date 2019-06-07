@@ -3,7 +3,6 @@
  *      PLACES_UPDATE: Received when places opening hours gets fetch/refetch.
  *      SERVICE_FAILURE: Received when the service access failed.
  */
-import { getNextOpenDay, parse_opening_hours } from './Util'
 
 Module.register('MMM-OpeningHours', {
   // Module defaults
@@ -18,7 +17,7 @@ Module.register('MMM-OpeningHours', {
       textAlign: 'center',
       size: 'small'
     },
-    debug: true,
+    debug: false,
     mockData: false
   },
 
@@ -36,7 +35,7 @@ Module.register('MMM-OpeningHours', {
   },
   // Required scripts
   getScripts: function () {
-    return ['moment.js']
+    return ['moment.js', this.file('Parsers.js')]
   },
 
   getStyles: function () {
@@ -121,6 +120,7 @@ Module.register('MMM-OpeningHours', {
           debugLog('Moment now: ', currentTime.format('HH:mm'))
 
           const opening_hours = parse_opening_hours(place.opening_hours.periods)
+          debugLog('Periods parsed: ', JSON.stringify(opening_hours))
           // Is yesterdays opening hours still in place. (Open over midnight).
           const openingHoursYesterday = opening_hours[moment().weekday() - 1]
           let closingTime = undefined

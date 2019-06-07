@@ -1,40 +1,10 @@
-const parse_opening_hours = require('../Util.js')
+var moment = require('moment')
+const {getNextOpenDay} = require('../Parsers.js')
 
-var period1 =
-  [
-    {
-      'close': {
-        'day': 5,
-        'time': '0300'
-      },
-      'open': {
-        'day': 4,
-        'time': '2200'
-      }
-    },
-    {
-      'close': {
-        'day': 6,
-        'time': '0300'
-      },
-      'open': {
-        'day': 5,
-        'time': '2200'
-      }
-    },
-    {
-      'close': {
-        'day': 0,
-        'time': '0300'
-      },
-      'open': {
-        'day': 6,
-        'time': '2200'
-      }
-    }
-  ]
-
-
-test("Correctly parses place that are open thursday, friday and saturday from 22-03.", () =>{
-  expect(parse_opening_hours(period1)).toBe(3);
+var parsed_period = {"4":{"close":moment("2019-06-07T01:00:00.000Z"),"open":moment("2019-06-06T20:00:00.000Z")},"5":{"close":moment("2019-06-08T01:00:00.000Z"),"open":moment("2019-06-07T20:00:00.000Z")},"6":{"close":moment("2019-06-02T01:00:00.000Z"),"open":moment("2019-06-08T20:00:00.000Z")}}
+describe("Retrives next open day.", () => {
+  test("next open day should be thursday", () => {
+    var nextOpenDay = getNextOpenDay(parsed_period, 6);
+    expect(nextOpenDay.open.format()).toBe(moment("2019-06-06T20:00:00.000Z").format());
+  });
 });
