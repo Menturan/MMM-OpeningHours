@@ -71,12 +71,6 @@ Module.register('MMM-OpeningHours', {
     return this.data.header
   },
 
-  isAlwaysOpen: function (place) {
-    // See note in docs. opening_hours -> periods -> close: https://developers.google.com/places/web-service/details#PlaceDetailsResults
-    const firstPeriod = place.opening_hours.periods[0]
-    return firstPeriod.open.day === 0 && firstPeriod.open.time === '0000' && firstPeriod.close === undefined
-  },
-
   getDom: function () {
     var wrapper = document.createElement('div')
     wrapper.style = 'width: -moz-fit-content;'

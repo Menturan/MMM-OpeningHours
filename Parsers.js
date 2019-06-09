@@ -25,4 +25,10 @@ function parse_opening_hours(periods) {
   return res
 }
 
-module.exports = {parse_opening_hours, getNextOpenDay};
+function isAlwaysOpen(place) { 
+  // See note in docs. opening_hours -> periods -> close: https://developers.google.com/places/web-service/details#PlaceDetailsResults
+  const firstPeriod = place.opening_hours.periods[0]
+  return firstPeriod.open.day === 0 && firstPeriod.open.time === '0000' && firstPeriod.close === undefined
+}
+
+module.exports = {parse_opening_hours, getNextOpenDay, isAlwaysOpen};
