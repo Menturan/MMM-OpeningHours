@@ -19,26 +19,7 @@ module.exports = NodeHelper.create({
       self.getOpeningHours()
     }, this.config.scheduleTime) // 1min
   },
-
-  /*
-  activateRetryScheduele: function () {
-    var self = this
-    if (this.retrytimer === undefined) {
-      self.log('Activating retry schedule.')
-      this.retrytimer = setInterval(function () {
-        self.getOpeningHours()
-      }, 60000 * 5) // 5min
-    }
-  },
-
-  deactivateRetryScheduele: function () {
-    var self = this
-    if (this.retrytimer !== undefined) {
-      self.log('Deactivating retry schedule.')
-      clearInterval(this.retrytimer)
-    }
-  },
-  */
+  
   mockGooglePlacesApi (self, index) {
     self.log('Using mock data.')
     return new Promise(function (resolve, reject) {
