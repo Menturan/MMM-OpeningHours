@@ -35,7 +35,7 @@ Module.register('MMM-OpeningHours', {
   },
   // Required scripts
   getScripts: function () {
-    return ['moment.js', this.file('Parsers.js')]
+    return ['moment.js', this.file('Parsers.js'), this.file('OpeningHoursLogic.js')]
   },
 
   getStyles: function () {
@@ -108,38 +108,15 @@ Module.register('MMM-OpeningHours', {
       let openCell = row.insertCell()
       openCell.style = 'padding-left: 8px;'
       if (place.opening_hours !== undefined) {
-        if (!this.isAlwaysOpen(place)) {
+        if (!isAlwaysOpen(place)) {
           let openCellTable = document.createElement('table')
           const currentTime = moment() // this.config.mockData ? moment('21:00', 'HH:mm') : moment()
           debugLog('Moment now: ', currentTime.format('HH:mm'))
 
           const opening_hours = parse_opening_hours(place.opening_hours.periods)
           debugLog('Periods parsed: ', JSON.stringify(opening_hours))
-          // Is yesterdays opening hours still in place. (Open over midnight).
-          const openingHoursYesterday = opening_hours[moment().weekday() - 1]
-          let closingTime = undefined
-          let openingTime = undefined
-          let placeIsOpen = false
-          // Closed yesterday?
-          if (openingHoursYesterday !== undefined) {
-            // Yesterday time still valid?
-            closingTime = openingHoursYesterday.close
-            openingTime = openingHoursYesterday.open
-            placeIsOpen = currentTime.isBetween(openingTime, closingTime)
-          }
 
-          if (opening_hours[moment().weekday()] !== undefined) {
-
-            if (placeIsOpen === false) {
-              let openingHoursToday = opening_hours[moment().weekday()]
-              closingTime = openingHoursToday.close
-              openingTime = openingHoursToday.open
-              placeIsOpen = currentTime.isBetween(openingTime, closingTime)
-            }
-          } else {
-            const nextOpenDay = getNextOpenDay(opening_hours, moment().weekday())
-            openingTime = nextOpenDay.open
-          }
+          const [openingTime, closingTime, placeIsOpen] = calculateOpeningHours(opening_hours, currentTime);
 
           // Text
           let openTextCell = openCellTable.insertRow()
