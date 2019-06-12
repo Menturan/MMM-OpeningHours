@@ -23,8 +23,14 @@ module.exports = NodeHelper.create({
   mockGooglePlacesApi (self, index) {
     self.log('Using mock data.')
     return new Promise(function (resolve, reject) {
-      let file = ''
-      switch (index) {
+      const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
+      const file = files[index];
+      const data = fs.readFileSync('./modules/MMM-OpeningHours/mock_data/'+file, 'utf8');
+      resolve({ json: JSON.parse(data)
+        }).catch((error)=>{
+          reject(error);
+        })
+      /* switch (index) {
         case 0:
           file = './modules/MMM-OpeningHours/mock_data/normal.json'
           break;
@@ -40,28 +46,33 @@ module.exports = NodeHelper.create({
         case 4:
           file = './modules/MMM-OpeningHours/mock_data/no_opening_hours.json'
           break;
-      }
+      } 
 
       fs.readFile(file, 'utf8', function (err, data) {
         if (err != null) {
           reject(err)
         }
         resolve({ json: JSON.parse(data) })
-      })
+      })*/
     })
   },
 
   getOpeningHours: function () {
     var self = this
     self.log('Fetching opening hours')
-    let opening_hours_promises = this.config.places.map((place, index) => {
+    let places = this.config.places;
+    if (this.config.mockData) {
+      const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
+      places = Array.from('x'.repeat(files.length));
+    }
+    let opening_hours_promises = places.map((place, index) => {
       let googlePromise
       if (this.config.mockData) {
         googlePromise = self.mockGooglePlacesApi(self, index)
       } else {
         self.log('Using Google Places API.')
         googlePromise = googleClient.place({
-          placeid: place,
+          placeid: place===null ? '':place,
           fields: ['name', 'opening_hours', 'place_id'],
         }).asPromise()
       }
