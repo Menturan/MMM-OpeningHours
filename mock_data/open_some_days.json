@@ -1,0 +1,52 @@
+{
+  "html_attributions" : [],
+  "result" : {
+    "name" : "Sturecompagniet",
+    "opening_hours" : {
+      "open_now" : false,
+      "periods" : [
+        {
+          "close" : {
+            "day" : 5,
+            "time" : "0300"
+          },
+          "open" : {
+            "day" : 4,
+            "time" : "2200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 6,
+            "time" : "0300"
+          },
+          "open" : {
+            "day" : 5,
+            "time" : "2200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 0,
+            "time" : "0300"
+          },
+          "open" : {
+            "day" : 6,
+            "time" : "2200"
+          }
+        }
+      ],
+      "weekday_text" : [
+        "måndag: Stängt",
+        "tisdag: Stängt",
+        "onsdag: Stängt",
+        "torsdag: 22:00–03:00",
+        "fredag: 22:00–03:00",
+        "lördag: 22:00–03:00",
+        "söndag: Stängt"
+      ]
+    },
+    "place_id" : "ChIJs4cQo1ydX0YRkoCF1aFt_YA"
+  },
+  "status" : "OK"
+}

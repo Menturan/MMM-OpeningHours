@@ -1,78 +1,78 @@
 {
   "html_attributions": [],
   "result": {
-    "name": "MacDonalds",
+    "name": "Normal store",
     "opening_hours": {
-      "open_now": false,
+      "open_now": true,
       "periods": [
         {
-          "close": {
-            "day": 0,
-            "time": "2200"
-          },
           "open": {
             "day": 0,
             "time": "0800"
+          },
+          "close": {
+            "day": 0,
+            "time": "2200"
           }
         },
         {
-          "close": {
-            "day": 1,
-            "time": "2200"
-          },
           "open": {
             "day": 1,
             "time": "0800"
+          },
+          "close": {
+            "day": 1,
+            "time": "2200"
           }
         },
         {
-          "close": {
-            "day": 2,
-            "time": "2200"
-          },
           "open": {
             "day": 2,
             "time": "0800"
+          },
+          "close": {
+            "day": 2,
+            "time": "2200"
           }
         },
         {
-          "close": {
-            "day": 3,
-            "time": "2200"
-          },
           "open": {
             "day": 3,
             "time": "0800"
+          },
+          "close": {
+            "day": 3,
+            "time": "2200"
           }
         },
         {
-          "close": {
-            "day": 4,
-            "time": "2200"
-          },
           "open": {
             "day": 4,
             "time": "0800"
+          },
+          "close": {
+            "day": 4,
+            "time": "2200"
           }
         },
         {
-          "close": {
-            "day": 5,
-            "time": "2200"
-          },
           "open": {
             "day": 5,
             "time": "0800"
+          },
+          "close": {
+            "day": 5,
+            "time": "2200"
           }
         },
         {
-          "close": {
-            "day": 6,
-            "time": "2200"
-          },
           "open": {
             "day": 6,
             "time": "0800"
+          },
+          "close": {
+            "day": 6,
+            "time": "2200"
           }
         }
       ],

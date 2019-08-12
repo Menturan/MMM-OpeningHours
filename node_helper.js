@@ -19,55 +19,60 @@ module.exports = NodeHelper.create({
       self.getOpeningHours()
     }, this.config.scheduleTime) // 1min
   },
-
-  /*
-  activateRetryScheduele: function () {
-    var self = this
-    if (this.retrytimer === undefined) {
-      self.log('Activating retry schedule.')
-      this.retrytimer = setInterval(function () {
-        self.getOpeningHours()
-      }, 60000 * 5) // 5min
-    }
-  },
-
-  deactivateRetryScheduele: function () {
-    var self = this
-    if (this.retrytimer !== undefined) {
-      self.log('Deactivating retry schedule.')
-      clearInterval(this.retrytimer)
-    }
-  },
-  */
+  
   mockGooglePlacesApi (self, index) {
     self.log('Using mock data.')
     return new Promise(function (resolve, reject) {
-      let file = ''
-      if (index === 0) {
-        file = './modules/MMM-OpeningHours/mock_data/burger_king.json'
-      } else {
-        file = './modules/MMM-OpeningHours/mock_data/macDonalds.json'
-      }
+      const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
+      const file = files[index];
+      const data = fs.readFileSync('./modules/MMM-OpeningHours/mock_data/'+file, 'utf8');
+      resolve({ json: JSON.parse(data)
+        }).catch((error)=>{
+          reject(error);
+        })
+      /* switch (index) {
+        case 0:
+          file = './modules/MMM-OpeningHours/mock_data/normal.json'
+          break;
+        case 1:
+          file = './modules/MMM-OpeningHours/mock_data/24hour.json'
+          break;
+        case 2:
+          file = './modules/MMM-OpeningHours/mock_data/closed_mon_sun.json'
+          break;
+        case 3:
+          file = './modules/MMM-OpeningHours/mock_data/open_eve_til_night.json'
+          break;
+        case 4:
+          file = './modules/MMM-OpeningHours/mock_data/no_opening_hours.json'
+          break;
+      } 
+
       fs.readFile(file, 'utf8', function (err, data) {
         if (err != null) {
           reject(err)
         }
         resolve({ json: JSON.parse(data) })
-      })
+      })*/
     })
   },
 
   getOpeningHours: function () {
     var self = this
     self.log('Fetching opening hours')
-    let opening_hours_promises = this.config.places.map((place, index) => {
+    let places = this.config.places;
+    if (this.config.mockData) {
+      const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
+      places = Array.from('x'.repeat(files.length));
+    }
+    let opening_hours_promises = places.map((place, index) => {
       let googlePromise
       if (this.config.mockData) {
         googlePromise = self.mockGooglePlacesApi(self, index)
       } else {
         self.log('Using Google Places API.')
         googlePromise = googleClient.place({
-          placeid: place,
+          placeid: place===null ? '':place,
           fields: ['name', 'opening_hours', 'place_id'],
         }).asPromise()
       }
