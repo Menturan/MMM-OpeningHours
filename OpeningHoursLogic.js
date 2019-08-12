@@ -33,4 +33,15 @@ function calculateOpeningHours(opening_hours, currentTime) {
 
     return [openingTime, closingTime, placeIsOpen];
 }
-module.exports = { calculateOpeningHours };
+
+var isServerSide = true
+try{
+    var dummy = window !== undefined
+    isServerSide = false
+}catch (e) {
+    // Do nothing...
+}
+
+if (isServerSide){
+  module.exports = { calculateOpeningHours };
+}

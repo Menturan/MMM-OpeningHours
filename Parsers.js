@@ -1,4 +1,15 @@
-var moment = require('moment');
+var isServerSide = true
+try{
+  var dummy = window !== undefined
+  isServerSide = false
+}catch (e) {
+  // Do nothing...
+}
+
+
+if (isServerSide) {
+  var moment = require('moment');
+}
 
 function getNextOpenDay(opening_hours, startDay) {
   for (let i = 1; i < 7; i++) {
@@ -31,4 +42,6 @@ function isAlwaysOpen(place) {
   return firstPeriod.open.day === 0 && firstPeriod.open.time === '0000' && firstPeriod.close === undefined
 }
 
-module.exports = {parse_opening_hours, getNextOpenDay, isAlwaysOpen};
+if (isServerSide) {
+  module.exports = { parse_opening_hours, getNextOpenDay, isAlwaysOpen };
+}
