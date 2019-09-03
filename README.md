@@ -45,13 +45,18 @@ Search for the place to get its ID. You really needs to **search** for a place. 
 | Key          | Value             | Required | Default           | Description                                                                                                                                                                                             |
 |--------------|-------------------|----------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | googleApiKey | _string_          | Yes      | N/A               | Your Google Places API Key.                                                                                                                                                                             |
-| places       | _place id_        | Yes      | N/A               | List of place ids. [See above.](#find-places-id)                                                                                                                                                        |
+| places       | [See below.](#places-config)        | Yes      | N/A               | List of place ids. [See above.](#find-places-id)                                                                                                                                                        |
 | scheduleTime | _milliseconds_    | No       | 86400000 (24h)    | Time between fetching place data from Google.                                                                                                                                                           |
 | timeFormat   | _number_          | No       | config.timeFormat | 24h, 12h. If not specified, uses same as parent config.                                                                                                                                                 |
 | language     | _ISO 639-1  code_ | No       | config.language   | Changes the translation. Time and date is still locale. Two letter country code. [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). If not specified, uses same as parent config. |
 | styling      | _object_          | No       | See next table.   | Configure table style.
 | debug        | _boolean_         | No       | false             | Debug output.                                                                                                                                                                                           |
 | mockData     | _boolean_         | No       | false             | Fake API-call. Used for development.                                                                                                                                                                    |
+
+### Places config
+Places are provided as a list `[]`. Example - `["place_id_1", "place_id_2", "place_id_3"]`.
+
+If you would like to use an alias for a place you put the place id and the alias in a list with the **place id first**. Example - `["place_id_1", ["place_id_2", "Place 2"], "place_id_3"]`.
 
 #### Styling
 
@@ -71,7 +76,7 @@ Search for the place to get its ID. You really needs to **search** for a place. 
     header: "Opening hours",
     config: {
     googleApiKey: "XXXXXXXXXXXXXX",
-        places: ["xxxxxxxx", "yyyyyyyy"],
+        places: ["xxxxxxxx", ["yyyyyyyy", "Alias y"]],
         styling: {
           size: 'small'
         }

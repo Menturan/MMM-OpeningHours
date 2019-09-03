@@ -101,7 +101,7 @@ Module.register('MMM-OpeningHours', {
       let row = table.insertRow()
       // Name
       let nameCell = row.insertCell()
-      nameCell.innerHTML = place.name
+      nameCell.innerHTML = place.alias === undefined ? place.name : place.alias;
       nameCell.className = 'bright'
       // Opening hours
 

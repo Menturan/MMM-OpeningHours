@@ -7,7 +7,7 @@
     "moment": "~2.24.0"
   },
   "devDependencies": {
-    "jest": "~24.8.0",
-    "standard": "~13.1.0"
+    "jest": "~24.9.0",
+    "standard": "~14.1.0"
   }
 }
