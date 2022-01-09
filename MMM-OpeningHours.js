@@ -179,7 +179,7 @@ Module.register('MMM-OpeningHours', {
 })
 
 function debugLog (msg, object) {
-  if (this.config.debug) {
+  if (config.debug) {
     Log.log(
       '[' +
       new Date(Date.now()).toLocaleTimeString() +
