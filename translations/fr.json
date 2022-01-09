@@ -1,0 +1,14 @@
+{
+  "HEADER": "Horaires d'ouverture",
+  "LOADING_MODULE": "Horaires d'ouverture en train de charger...",
+  "NO_API_KEY_PROVIDED": "Pas de clé d'API fournie.",
+  "NO_PLACES_PROVIDED": "Pas d'endroits renseignés.",
+  "CLOSED": "Fermé",
+  "CLOSES": "Ferme",
+  "OPEN": "Ouvert",
+  "OPENS": "Ouvre",
+  "OPENS_IN": "Ouvre dans {timeUntilOpen}",
+  "CLOSES_IN": "Ferme dans {timeUntilClosing}",
+  "NOT_AVAILABLE": "N/A",
+  "ALWAYS_OPEN": "Toujours ouvert"
+}
