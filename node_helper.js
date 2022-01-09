@@ -4,6 +4,7 @@ var google = require('@google/maps')
 var fs = require('fs')
 var util = require("./backendUtil")
 const OverpassFrontend = require('overpass-frontend')
+const opening_hours = require("opening_hours");
 const { result } = require('lodash')
 
 var googleClient = undefined
@@ -39,35 +40,45 @@ module.exports = NodeHelper.create({
 
     mockGooglePlacesApiFromOSM(self, index) {
         self.log("Using OverpassAPI data.")
+        var OSMresult = {};
+        OSMresult.name = self.config.places[index][1]
+        const overpassFrontend = new OverpassFrontend('//overpass-api.de/api/interpreter')
         return new Promise(function (resolve, reject) {
-
-
             // you may specify an OSM file as url, e.g. 'test/data.osm.bz2'
-            const overpassFrontend = new OverpassFrontend('//overpass-api.de/api/interpreter')
-
             // request restaurants in the specified bounding box
             overpassFrontend.get(
-                ['n311423696', 'n8661321105', "w82532728"],
+                [self.config.places[index][0],],
                 {
                 properties: OverpassFrontend.TAGS
               },
               function (err, result) {
                 if (result) {
+                    var oh = new opening_hours(result.tags.opening_hours, {address: {country_code: 'fr', state: "Pays de la Loire"}});
+                    var date = new Date();
+                    OSMresult.is_open = oh.getState(date);
+                    OSMresult.next_change = oh.getNextChange();
+                    OSMresult.name = result.tags.name;
+                    OSMresult.place_id = result.id;
                   console.log('* ' + result.tags.name + ' (' + result.id + ')')
+                  console.log(OSMresult)
+                  var mockPlaceAPI = {}
+                  mockPlaceAPI.status = "OK";
+                  mockPlaceAPI.result = OSMresult;
+                  resolve({
+                    json: mockPlaceAPI
+                  })
                 } else {
                   console.log('* empty result')
                 }
               },
               function (err) {
-                if (err) { console.log(err) }
+                if (err) {
+                    console.log(err) ;
+                    reject(error);
+                }
               }
             )
 
-            resolve({
-                json: result
-            }).catch((error) => {
-                reject(error);
-            })
         })
     },
 
@@ -75,6 +86,7 @@ module.exports = NodeHelper.create({
         var self = this
         self.log('Fetching opening hours')
         let places = this.config.places;
+        let openstreetmap = this.config.openstreetmap;
         if (this.config.mockData) {
             const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
             places = Array.from('x'.repeat(files.length));
@@ -88,12 +100,16 @@ module.exports = NodeHelper.create({
             if (this.config.mockData) {
                 googlePromise = self.mockGooglePlacesApi(self, index)
             } else {
-                googlePromise = self.mockGooglePlacesApiFromOSM(self, index)
-                // self.log('Using Google Places API.')
-                // googlePromise = googleClient.place({
-                //     placeid: place === null ? '' : place,
-                //     fields: ['name', 'opening_hours', 'place_id'],
-                // }).asPromise()
+                if (openstreetmap) {
+                    self.log('Using OSM overpass API.')
+                    googlePromise = self.mockGooglePlacesApiFromOSM(self, index)
+                } else {
+                    self.log('Using Google Places API.')
+                    googlePromise = googleClient.place({
+                        placeid: place === null ? '' : place,
+                        fields: ['name', 'opening_hours', 'place_id'],
+                    }).asPromise()
+                }
             }
             self.debugLog('googlePromise - ', googlePromise)
             return googlePromise.then(function (response) {
