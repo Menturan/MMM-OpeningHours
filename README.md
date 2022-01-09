@@ -1,18 +1,17 @@
 # MMM-OpeningHours - WIP
 
-[![David](https://david-dm.org/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://david-dm.org/Menturan/MMM-OpeningHours)
-[![Known Vulnerabilities](https://snyk.io/test/github/Menturan/MMM-OpeningHours/badge.svg)](https://snyk.io/test/github/Menturan/MMM-OpeningHours) 
+[![Known Vulnerabilities](https://snyk.io/test/github/Menturan/MMM-OpeningHours/badge.svg)](https://snyk.io/test/github/Menturan/MMM-OpeningHours)
 [![LGTM Alerts](https://img.shields.io/lgtm/alerts/g/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://lgtm.com/projects/g/Menturan/MMM-OpeningHours/alerts?mode=list)
 [![LGTM Grade](https://img.shields.io/lgtm/grade/javascript/g/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://lgtm.com/projects/g/Menturan/MMM-OpeningHours/)
 [![Yarn](https://img.shields.io/badge/dependency%20manager-Yarn-blue.svg?style=flat-square)](https://yarnpkg.com)
 
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg?style=flat-square)](https://saythanks.io/to/Menturan)
-![Maintenance](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square)
+![Maintenance](https://img.shields.io/maintenance/yes/2022.svg?style=flat-square)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://github.com/Menturan/MMM-OpeningHours/graphs/commit-activity)
 [![GitHub License](https://img.shields.io/github/license/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://github.com/Menturan/MMM-OpeningHours/blob/master/LICENSE)
 
 
-**Note! This module is still under development! 
+**Note! This module is still under development!
 Things such as configurations and appearance may change. Use at your own risk!**
 
 Magic Mirror module that displays places opening hours.
@@ -23,11 +22,11 @@ Relies on [Google Places API](https://developers.google.com/places/web-service/i
 
 ## Prerequisite
 
-You need to have a Google Places API key to use this module. 
+You need to have a Google Places API key to use this module.
 Follow their guide here: [Get API Key](https://developers.google.com/places/web-service/get-api-key).
 
-**NOTE! The opening hours field in Google Places API is a billed field. 
-However, Google give you a free monthly credit. 
+**NOTE! The opening hours field in Google Places API is a billed field.
+However, Google give you a free monthly credit.
 Please carefully read about their billing [here](https://developers.google.com/places/web-service/usage-and-billing).
 Contributors of this module is not responsible for any charges.**
 
@@ -38,7 +37,7 @@ This module uses Yarn.
 ## Find places ID
 Search for the place to get its ID. You really needs to **search** for a place. Clicking on a place wont cut it.
 
-[Place ID Finder](https://google-developers.appspot.com/maps/documentation/javascript/examples/full/places-placeid-finder)
+[Place ID Finder](https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder)
 
 ## Configuration
 
@@ -60,11 +59,11 @@ If you would like to use an alias for a place you put the place id and the alias
 
 #### Styling
 
-| Key           | Value     | Required | Default         | Description                                                           |
-|---------------|-----------|----------|-----------------|-----------------------------------------------------------------------|
-| showTimeUntil | _boolean_ | No       | true            | Show time until close/open instead of time when closed/open.          |
-| textAlign     | _string_  | No       | center          | Table text alignment. Possible values: left, right, center.           |
-| size          | _string_  | No       | small           | Size of table. Possible values: xsmall, small, medium. large, xlarge. |
+| Key           | Value     | Required | Default | Description                                                           |
+|---------------|-----------|----------|---------|-----------------------------------------------------------------------|
+| showTimeUntil | _boolean_ | No       | false   | Show time until close/open instead of time when closed/open.          |
+| textAlign     | _string_  | No       | center  | Table text alignment. Possible values: left, right, center.           |
+| size          | _string_  | No       | small   | Size of table. Possible values: xsmall, small, medium. large, xlarge. |
 
 
 ## Example config
