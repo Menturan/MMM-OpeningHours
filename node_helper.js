@@ -3,6 +3,8 @@ const NodeHelper = require('node_helper')
 var google = require('@google/maps')
 var fs = require('fs')
 var util = require("./backendUtil")
+const OverpassFrontend = require('overpass-frontend')
+const { result } = require('lodash')
 
 var googleClient = undefined
 
@@ -35,6 +37,40 @@ module.exports = NodeHelper.create({
         })
     },
 
+    mockGooglePlacesApiFromOSM(self, index) {
+        self.log("Using OverpassAPI data.")
+        return new Promise(function (resolve, reject) {
+
+
+            // you may specify an OSM file as url, e.g. 'test/data.osm.bz2'
+            const overpassFrontend = new OverpassFrontend('//overpass-api.de/api/interpreter')
+
+            // request restaurants in the specified bounding box
+            overpassFrontend.get(
+                ['n311423696', 'n8661321105', "w82532728"],
+                {
+                properties: OverpassFrontend.TAGS
+              },
+              function (err, result) {
+                if (result) {
+                  console.log('* ' + result.tags.name + ' (' + result.id + ')')
+                } else {
+                  console.log('* empty result')
+                }
+              },
+              function (err) {
+                if (err) { console.log(err) }
+              }
+            )
+
+            resolve({
+                json: result
+            }).catch((error) => {
+                reject(error);
+            })
+        })
+    },
+
     getOpeningHours: function () {
         var self = this
         self.log('Fetching opening hours')
@@ -48,14 +84,16 @@ module.exports = NodeHelper.create({
                 place = place[0] // place=[placeid, placename]
             }
             let googlePromise
+            self.debugLog('config - ', this.config)
             if (this.config.mockData) {
                 googlePromise = self.mockGooglePlacesApi(self, index)
             } else {
-                self.log('Using Google Places API.')
-                googlePromise = googleClient.place({
-                    placeid: place === null ? '' : place,
-                    fields: ['name', 'opening_hours', 'place_id'],
-                }).asPromise()
+                googlePromise = self.mockGooglePlacesApiFromOSM(self, index)
+                // self.log('Using Google Places API.')
+                // googlePromise = googleClient.place({
+                //     placeid: place === null ? '' : place,
+                //     fields: ['name', 'opening_hours', 'place_id'],
+                // }).asPromise()
             }
             self.debugLog('googlePromise - ', googlePromise)
             return googlePromise.then(function (response) {
@@ -89,11 +127,11 @@ module.exports = NodeHelper.create({
             if (!this.config.mockData) {
                 if (this.started === false) {
                     moment.locale(this.config.language)
-                    googleClient = google.createClient({
-                        key: this.config.googleApiKey,
-                        Promise: Promise,
-                        language: this.config.language
-                    })
+                    // googleClient = google.createClient({
+                    //     key: this.config.googleApiKey,
+                    //     Promise: Promise,
+                    //     language: this.config.language
+                    // })
                     self.scheduleUpdate()
                 }
             }
