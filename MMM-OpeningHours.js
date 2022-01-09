@@ -152,6 +152,10 @@ Module.register('MMM-OpeningHours', {
         } else {
           openCell.innerHTML = this.translate('ALWAYS_OPEN')
         }
+      } else if ("is_open" in place) {
+        openCell.style = place.is_open ? 'color: green;' : 'color: red;'
+        openCell.innerHTML = place.is_open ? this.translate('OPEN') : this.translate('CLOSED')
+
       } else {
         openCell.innerHTML = this.translate('NOT_AVAILABLE')
       }
