@@ -13,7 +13,7 @@ Module.register('MMM-OpeningHours', {
     timeFormat: config.timeFormat,
     language: config.language,
     styling: {
-      showTimeUntil: true,
+      showTimeUntil: false,
       textAlign: 'center',
       size: 'small'
     },
