@@ -105,14 +105,15 @@ Module.register('MMM-OpeningHours', {
       let nameCell = row.insertCell()
       nameCell.innerHTML = place.alias === undefined ? place.name : place.alias;
       nameCell.className = 'bright'
+      nameCell.style = 'vertical-align: top'
       // Opening hours
 
       let openCell = row.insertCell()
       openCell.style = 'padding-left: 8px;'
+      const currentTime = moment() // this.config.mockData ? moment('21:00', 'HH:mm') : moment()
       if (place.opening_hours !== undefined) {
         if (!isAlwaysOpen(place)) {
           let openCellTable = document.createElement('table')
-          const currentTime = moment() // this.config.mockData ? moment('21:00', 'HH:mm') : moment()
           debugLog('Moment now: ', currentTime.format('HH:mm'))
 
           const opening_hours = parse_opening_hours(place.opening_hours.periods)
@@ -153,9 +154,28 @@ Module.register('MMM-OpeningHours', {
           openCell.innerHTML = this.translate('ALWAYS_OPEN')
         }
       } else if ("is_open" in place) {
-        openCell.style = place.is_open ? 'color: green;' : 'color: red;'
-        openCell.innerHTML = place.is_open ? this.translate('OPEN') : this.translate('CLOSED')
-
+        let openCellTable = document.createElement('table')
+        // Main text
+        let openTextCell = openCellTable.insertRow()
+        openTextCell.style = place.is_open ? 'color: green;' : 'color: red;'
+        openTextCell.innerHTML = place.is_open ? this.translate('OPEN') : this.translate('CLOSED')
+        // Hours
+        let openingHoursCell = openCellTable.insertRow()
+        let untilChangeDuration = moment.duration(moment(place.next_change).diff(currentTime))
+        if (place.is_open) {
+          if (untilChangeDuration.hours() < 15) {
+            openingHoursCell.innerHTML = this.translate('CLOSES_IN', { 'timeUntilClosing': untilChangeDuration.humanize() })
+          } else {
+            openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' +  moment(place.next_change).calendar().toLowerCase();
+          }
+        } else {
+          if (untilChangeDuration.hours() < 15) {
+            openingHoursCell.innerHTML = this.translate('OPENS_IN', { 'timeUntilOpen': untilChangeDuration.humanize() })
+          } else {
+            openingHoursCell.innerHTML = this.translate('OPENS') + ' ' +  moment(place.next_change).calendar().toLowerCase();
+          }
+        }
+        openCell.appendChild(openCellTable)
       } else {
         openCell.innerHTML = this.translate('NOT_AVAILABLE')
       }
