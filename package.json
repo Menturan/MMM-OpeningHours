@@ -4,6 +4,8 @@
   },
   "dependencies": {
     "@google/maps": "~1.1.3",
+    "opening_hours": "~3.7.0",
+    "overpass-frontend": "~2.7.0",
     "moment": "~2.29.1"
   },
   "devDependencies": {

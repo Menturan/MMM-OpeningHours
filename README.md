@@ -49,6 +49,7 @@ Search for the place to get its ID. You really needs to **search** for a place. 
 | timeFormat   | _number_          | No       | config.timeFormat | 24h, 12h. If not specified, uses same as parent config.                                                                                                                                                 |
 | language     | _ISO 639-1  code_ | No       | config.language   | Changes the translation. Time and date is still locale. Two letter country code. [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). If not specified, uses same as parent config. |
 | styling      | _object_          | No       | See next table.   | Configure table style.
+| openstreetmap | _boolean_        | No       | false             | Use OSM opening_hours data via Overpass API
 | debug        | _boolean_         | No       | false             | Debug output.                                                                                                                                                                                           |
 | mockData     | _boolean_         | No       | false             | Fake API-call. Used for development.                                                                                                                                                                    |
 
@@ -56,6 +57,12 @@ Search for the place to get its ID. You really needs to **search** for a place. 
 Places are provided as a list `[]`. Example - `["place_id_1", "place_id_2", "place_id_3"]`.
 
 If you would like to use an alias for a place you put the place id and the alias in a list with the **place id first**. Example - `["place_id_1", ["place_id_2", "Place 2"], "place_id_3"]`.
+
+When `openstreetmap` is set to `true`, you can list identifiers of the OSM objects, preceded by `n` for nodes, `w` for ways, `r` for relations. To get those
+identifiers you can use https://overpass-turbo.eu/?template=key&key=opening_hours or modify the boundingbox and run `node test-overpass.js` (identifiers can then be
+tested in `test-overpass-ids.js`).
+
+TODO: generate a configuration from a geopoint finding all `opening_hours` data surrounding it and then filtering the interresting points.
 
 #### Styling
 
@@ -74,7 +81,8 @@ If you would like to use an alias for a place you put the place id and the alias
     position: "bottom_right",
     header: "Opening hours",
     config: {
-    googleApiKey: "XXXXXXXXXXXXXX",
+        googleApiKey: "XXXXXXXXXXXXXX",
+        openstreetmap: false,
         places: ["xxxxxxxx", ["yyyyyyyy", "Alias y"]],
         styling: {
           size: 'small'
