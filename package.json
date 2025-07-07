@@ -1,9 +1,18 @@
 {
+  "name": "mmm-openinghours",
+  "version": "1.0.0",
+  "description": "MagicMirror² Module to display store opening hours",
+  "main": "MMM-OpeningHours.js",
   "scripts": {
     "test": "jest"
   },
+  "keywords": [
+    "MagicMirror",
+    "Opening Hours",
+    "Smarthome"
+  ],
   "dependencies": {
-    "@google/maps": "~1.1.3",
+    "@googlemaps/google-maps-services-js": "^3.4.1",
     "moment": "~2.29.2"
   },
   "devDependencies": {

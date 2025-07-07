@@ -1,20 +1,17 @@
-# MMM-OpeningHours - WIP
+# MMM-OpeningHours - originally by [Menturan](https://github.com/Menturan/MMM-OpeningHours)
 
-[![Known Vulnerabilities](https://snyk.io/test/github/Menturan/MMM-OpeningHours/badge.svg)](https://snyk.io/test/github/Menturan/MMM-OpeningHours)
-[![LGTM Alerts](https://img.shields.io/lgtm/alerts/g/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://lgtm.com/projects/g/Menturan/MMM-OpeningHours/alerts?mode=list)
-[![LGTM Grade](https://img.shields.io/lgtm/grade/javascript/g/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://lgtm.com/projects/g/Menturan/MMM-OpeningHours/)
+A [MagicMirror²](https://magicmirror.builders) module to show store opening hours.
+
+[![Platform](https://img.shields.io/badge/platform-MagicMirror-informational)](https://MagicMirror.builders)
+
+[![Known Vulnerabilities](https://snyk.io/test/github/Menturan/MMM-OpeningHours/badge.svg)](https://snyk.io/test/github/mumblebaj/MMM-OpeningHours)
 [![Yarn](https://img.shields.io/badge/dependency%20manager-Yarn-blue.svg?style=flat-square)](https://yarnpkg.com)
-
-[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg?style=flat-square)](https://saythanks.io/to/Menturan)
-![Maintenance](https://img.shields.io/maintenance/yes/2022.svg?style=flat-square)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://github.com/Menturan/MMM-OpeningHours/graphs/commit-activity)
-[![GitHub License](https://img.shields.io/github/license/Menturan/MMM-OpeningHours.svg?style=flat-square)](https://github.com/Menturan/MMM-OpeningHours/blob/master/LICENSE)
+![Maintenance](https://img.shields.io/maintenance/yes/2025.svg?style=flat-square)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mumblebaj/MMM-OpeningHours.svg?style=flat-square)](https://github.com/mumblebaj/MMM-OpeningHours/graphs/commit-activity)
+[![license](https://camo.githubusercontent.com/891d072bc1668435fd8dd5adcf27ef9ec656ed5457af83c130457fc81c417ece/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f6c6963656e73652f4d656e747572616e2f4d4d4d2d4f70656e696e67486f7572732e7376673f7374796c653d666c61742d737175617265)](LICENSE)
 
 
-**Note! This module is still under development!
-Things such as configurations and appearance may change. Use at your own risk!**
-
-Magic Mirror module that displays places opening hours.
+MagicMirror² module that displays places opening hours.
 Relies on [Google Places API](https://developers.google.com/places/web-service/intro).
 
 ## Screenshot
@@ -32,7 +29,9 @@ Contributors of this module is not responsible for any charges.**
 
 ## Install
 This module uses Yarn.
-1. `yarn install`
+1. `yarn install` <br>
+NPM also works
+2. `npm install --omit=dev`
 
 ## Find places ID
 Search for the place to get its ID. You really needs to **search** for a place. Clicking on a place wont cut it.
