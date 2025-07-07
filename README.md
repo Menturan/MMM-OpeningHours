@@ -1,4 +1,4 @@
-# MMM-OpeningHours - WIP
+# MMM-OpeningHours - originally by [Menturan](https://github.com/Menturan/MMM-OpeningHours)
 
 A [MagicMirror²](https://magicmirror.builders) module to show store opening hours.
 
@@ -8,7 +8,7 @@ A [MagicMirror²](https://magicmirror.builders) module to show store opening hou
 [![Yarn](https://img.shields.io/badge/dependency%20manager-Yarn-blue.svg?style=flat-square)](https://yarnpkg.com)
 ![Maintenance](https://img.shields.io/maintenance/yes/2025.svg?style=flat-square)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mumblebaj/MMM-OpeningHours.svg?style=flat-square)](https://github.com/mumblebaj/MMM-OpeningHours/graphs/commit-activity)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
+[![license](https://camo.githubusercontent.com/891d072bc1668435fd8dd5adcf27ef9ec656ed5457af83c130457fc81c417ece/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f6c6963656e73652f4d656e747572616e2f4d4d4d2d4f70656e696e67486f7572732e7376673f7374796c653d666c61742d737175617265)](LICENSE)
 
 
 MagicMirror² module that displays places opening hours.
