@@ -8,8 +8,10 @@ jest.mock('../placesApi.js', () => {
 const placesApi = require('../placesApi.js')
 const definition = require('../node_helper.js')
 
+const helpers = []
 function createHelper (config) {
   const helper = Object.create(definition)
+  helpers.push(helper)
   helper.name = 'MMM-OpeningHours'
   helper.sent = []
   helper.sendSocketNotification = (notification, payload) => helper.sent.push({ notification, payload })
@@ -20,6 +22,9 @@ function createHelper (config) {
 }
 
 beforeEach(() => jest.resetAllMocks())
+afterEach(() => {
+  helpers.splice(0).forEach(h => { clearTimeout(h.retryTimer); clearInterval(h.updateTimer) })
+})
 
 test('fetches every place via Places API (New) and applies aliases', async () => {
   placesApi.fetchPlaceNew.mockImplementation(async (id) => ({ place_id: id, name: 'Name ' + id, opening_hours: undefined }))
@@ -82,4 +87,72 @@ test('a second SETUP (browser reload) reuses cached data instead of calling the 
   } finally {
     clearInterval(helper.updateTimer)
   }
+})
+
+describe('after a failed fetch', () => {
+  afterEach(() => jest.useRealTimers())
+
+  test('a failing place keeps its last known hours', async () => {
+    const hours = { periods: [{ open: { day: 1, time: '0900' }, close: { day: 1, time: '1700' } }] }
+    placesApi.fetchPlaceNew.mockImplementation(async (id) => ({ place_id: id, name: 'Name ' + id, opening_hours: hours }))
+    const helper = createHelper({ places: [['a', 'Alias A'], 'b'] })
+    await helper.getOpeningHours()
+
+    placesApi.fetchPlaceNew.mockImplementation(async (id) => {
+      if (id === 'a') throw new Error('timeout')
+      return { place_id: id, name: 'Name ' + id, opening_hours: hours }
+    })
+    await helper.getOpeningHours()
+
+    const payload = helper.sent[1].payload
+    expect(helper.sent[1].notification).toBe('PLACES_UPDATE')
+    expect(payload[0]).toMatchObject({ place_id: 'a', name: 'Name a', alias: 'Alias A', opening_hours: hours })
+    expect(payload[0].error).toBeUndefined()
+  })
+
+  test('all places failing keeps the last known data instead of sending SERVICE_FAILURE', async () => {
+    placesApi.fetchPlaceNew.mockResolvedValue({ place_id: 'a', name: 'A' })
+    const helper = createHelper({ places: ['a'] })
+    await helper.getOpeningHours()
+    placesApi.fetchPlaceNew.mockRejectedValue(new Error('offline'))
+    await helper.getOpeningHours()
+    expect(helper.sent.map(s => s.notification)).toEqual(['PLACES_UPDATE', 'PLACES_UPDATE'])
+    expect(helper.sent[1].payload[0].name).toBe('A')
+  })
+
+  test('retries after 1, 5 and 30 minutes, then every 30 minutes, and stops once a fetch succeeds', async () => {
+    jest.useFakeTimers('modern')
+    placesApi.fetchPlaceNew.mockRejectedValue(new Error('offline'))
+    const helper = createHelper({ places: ['a'] })
+    await helper.getOpeningHours()
+
+    const flush = async () => { for (let i = 0; i < 5; i++) await Promise.resolve() }
+    const expectRetryAfter = async (minutes, calls) => {
+      jest.advanceTimersByTime(minutes * 60 * 1000 - 1)
+      await flush()
+      expect(placesApi.fetchPlaceNew).toHaveBeenCalledTimes(calls - 1)
+      jest.advanceTimersByTime(1)
+      await flush()
+      expect(placesApi.fetchPlaceNew).toHaveBeenCalledTimes(calls)
+    }
+    await expectRetryAfter(1, 2)
+    await expectRetryAfter(5, 3)
+    await expectRetryAfter(30, 4)
+    await expectRetryAfter(30, 5)
+
+    placesApi.fetchPlaceNew.mockResolvedValue({ place_id: 'a', name: 'A' })
+    await expectRetryAfter(30, 6)
+    expect(helper.retryTimer).toBeUndefined()
+    expect(helper.retryCount).toBe(0)
+    jest.advanceTimersByTime(60 * 60 * 1000)
+    await flush()
+    expect(placesApi.fetchPlaceNew).toHaveBeenCalledTimes(6)
+  })
+
+  test('no retry is scheduled when every place succeeds', async () => {
+    placesApi.fetchPlaceNew.mockResolvedValue({ place_id: 'a', name: 'A' })
+    const helper = createHelper({ places: ['a'] })
+    await helper.getOpeningHours()
+    expect(helper.retryTimer).toBeUndefined()
+  })
 })

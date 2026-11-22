@@ -8,5 +8,8 @@
   "OPEN": "Abierto",
   "OPENS": "Abre",
   "OPENS_IN": "Abre en {timeUntilOpen}",
-  "CLOSES_IN": "Cierra en {timeUntilClosing}"
+  "CLOSES_IN": "Cierra en {timeUntilClosing}",
+  "TOMORROW": "mañana",
+  "NOT_AVAILABLE": "N/D",
+  "ALWAYS_OPEN": "Siempre abierto"
 }

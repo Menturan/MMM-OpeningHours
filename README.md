@@ -45,6 +45,10 @@ Check [Places API usage and billing](https://developers.google.com/maps/document
 for current prices and free usage caps. Setting a [quota](https://console.cloud.google.com/apis/api/places.googleapis.com/quotas)
 on the API is a cheap safety net.
 
+If a fetch fails, the module keeps showing the last known hours and retries after 1, 5 and 30 minutes,
+then every 30 minutes until it succeeds. Each retry is billed like a normal request. A failure that never
+clears, such as an invalid API key, adds about 48 requests per place per day.
+
 ### Existing projects with Places API (Legacy)
 
 If your Cloud project already has the legacy Places API enabled, you can keep using it with
