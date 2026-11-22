@@ -1,15 +1,10 @@
 # MMM-OpeningHours
 
-[![GitHub License](https://img.shields.io/github/license/htilly/MMM-OpeningHours.svg?style=flat-square)](LICENSE)
+[![GitHub License](https://img.shields.io/github/license/Menturan/MMM-OpeningHours.svg?style=flat-square)](LICENSE)
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg?style=flat-square)](https://saythanks.io/to/Menturan)
 
 MagicMirror module that displays places' opening hours.
 Relies on the [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service/op-overview).
-
-> **Fork notice.** This is a fork of [Menturan/MMM-OpeningHours](https://github.com/Menturan/MMM-OpeningHours),
-> written by Menturan and contributors and licensed under GPL-3.0. Modified in November 2026 by htilly:
-> migrated to Places API (New), removed the deprecated `@google/maps` client, and fixed opening hours bugs.
-> See the git history for details.
 
 ## Screenshot
 ![Screenshot](screenshot.png)
@@ -59,7 +54,7 @@ Places API (New) is recommended. If you use both, Google recommends a separate A
 
 ```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/htilly/MMM-OpeningHours.git
+git clone https://github.com/Menturan/MMM-OpeningHours.git
 ```
 
 The module has no runtime dependencies, so there is no `npm install` step. It uses MagicMirror's built-in

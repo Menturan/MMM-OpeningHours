@@ -2,7 +2,7 @@
   "name": "mmm-openinghours",
   "description": "MagicMirror module that displays opening hours of places from the Google Places API.",
   "license": "GPL-3.0",
-  "repository": "https://github.com/htilly/MMM-OpeningHours",
+  "repository": "https://github.com/Menturan/MMM-OpeningHours",
   "engines": {
     "node": ">=22"
   },
