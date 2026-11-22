@@ -1,0 +1,178 @@
+{
+  "id": "holiday-id",
+  "displayName": {
+    "text": "Holiday store",
+    "languageCode": "en"
+  },
+  "currentOpeningHours": {
+    "openNow": false,
+    "periods": [
+      {
+        "open": {
+          "day": 1,
+          "hour": 9,
+          "minute": 0,
+          "date": {
+            "year": 2026,
+            "month": 12,
+            "day": 21
+          }
+        },
+        "close": {
+          "day": 1,
+          "hour": 17,
+          "minute": 0,
+          "date": {
+            "year": 2026,
+            "month": 12,
+            "day": 21
+          }
+        }
+      },
+      {
+        "open": {
+          "day": 2,
+          "hour": 9,
+          "minute": 0,
+          "date": {
+            "year": 2026,
+            "month": 12,
+            "day": 22
+          }
+        },
+        "close": {
+          "day": 2,
+          "hour": 17,
+          "minute": 0,
+          "date": {
+            "year": 2026,
+            "month": 12,
+            "day": 22
+          }
+        }
+      },
+      {
+        "open": {
+          "day": 3,
+          "hour": 9,
+          "minute": 0,
+          "date": {
+            "year": 2026,
+            "month": 12,
+            "day": 23
+          }
+        },
+        "close": {
+          "day": 3,
+          "hour": 17,
+          "minute": 0,
+          "date": {
+            "year": 2026,
+            "month": 12,
+            "day": 23
+          }
+        }
+      }
+    ],
+    "weekdayDescriptions": [
+      "Monday: 09:00 – 17:00",
+      "Tuesday: 09:00 – 17:00",
+      "Wednesday: 09:00 – 17:00",
+      "Thursday: Closed",
+      "Friday: Closed",
+      "Saturday: Closed",
+      "Sunday: Closed"
+    ],
+    "specialDays": [
+      {
+        "date": {
+          "year": 2026,
+          "month": 12,
+          "day": 24
+        }
+      },
+      {
+        "date": {
+          "year": 2026,
+          "month": 12,
+          "day": 25
+        }
+      }
+    ],
+    "nextOpenTime": "2026-12-21T08:00:00Z"
+  },
+  "regularOpeningHours": {
+    "openNow": false,
+    "periods": [
+      {
+        "open": {
+          "day": 1,
+          "hour": 9,
+          "minute": 0
+        },
+        "close": {
+          "day": 1,
+          "hour": 17,
+          "minute": 0
+        }
+      },
+      {
+        "open": {
+          "day": 2,
+          "hour": 9,
+          "minute": 0
+        },
+        "close": {
+          "day": 2,
+          "hour": 17,
+          "minute": 0
+        }
+      },
+      {
+        "open": {
+          "day": 3,
+          "hour": 9,
+          "minute": 0
+        },
+        "close": {
+          "day": 3,
+          "hour": 17,
+          "minute": 0
+        }
+      },
+      {
+        "open": {
+          "day": 4,
+          "hour": 9,
+          "minute": 0
+        },
+        "close": {
+          "day": 4,
+          "hour": 17,
+          "minute": 0
+        }
+      },
+      {
+        "open": {
+          "day": 5,
+          "hour": 9,
+          "minute": 0
+        },
+        "close": {
+          "day": 5,
+          "hour": 17,
+          "minute": 0
+        }
+      }
+    ],
+    "weekdayDescriptions": [
+      "Monday: 09:00 – 17:00",
+      "Tuesday: 09:00 – 17:00",
+      "Wednesday: 09:00 – 17:00",
+      "Thursday: 09:00 – 17:00",
+      "Friday: 09:00 – 17:00",
+      "Saturday: Closed",
+      "Sunday: Closed"
+    ]
+  }
+}
