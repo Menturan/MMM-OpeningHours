@@ -17,22 +17,18 @@ Module.register('MMM-OpeningHours', {
       textAlign: 'center',
       size: 'small'
     },
+    useLegacyApi: false, // true = Places API (Legacy). Only works on Cloud projects that already have it enabled.
     debug: false,
     mockData: false
   },
 
   getTranslations () {
-    switch (this.config.language) {
-      case 'en':
-        return { en: 'translations/en.json' }
-      case 'sv':
-        return { sv: 'translations/sv.json' }
-      case 'es':
-        return { es: 'translations/es.json' }
-      case 'fr':
-        return { es: 'translations/fr.json' }
-      default:
-        return { en: 'translations/en.json' }
+    // MagicMirror picks the file matching the language and falls back to English.
+    return {
+      en: 'translations/en.json',
+      sv: 'translations/sv.json',
+      es: 'translations/es.json',
+      fr: 'translations/fr.json'
     }
   },
   // Required scripts
@@ -48,10 +44,10 @@ Module.register('MMM-OpeningHours', {
   start: function () {
     Log.log('Starting module: ' + this.name)
     this.config.styling = { ...this.defaults.styling, ...this.config.styling }
-    debugLog('Default config: ', this.defaults)
-    debugLog('Config: ', this.config)
+    this.debugLog('Default config: ', this.defaults)
+    this.debugLog('Config: ', this.config)
     this.loaded = false
-    moment.locale(config.language)
+    moment.locale(this.config.language)
     if (this.config.googleApiKey === undefined || this.config.googleApiKey === '') {
       this.failure = this.translate('NO_API_KEY_PROVIDED')
       this.loaded = true
@@ -89,7 +85,7 @@ Module.register('MMM-OpeningHours', {
 
     // Failure
     if (this.failure !== undefined) {
-      container.innerHTML = this.failure
+      container.textContent = this.failure
       container.className = 'dimmed light small'
       wrapper.appendChild(container)
       return wrapper
@@ -97,63 +93,58 @@ Module.register('MMM-OpeningHours', {
 
     let table = document.createElement('table')
     table.className = 'normal'
+    const timeFormat = this.config.timeFormat === 12 ? 'h:mm A' : 'HH:mm'
     this.placesOpeningHours.forEach(place => {
-      debugLog('Place name: ', place.name)
-      debugLog('Place id: ', place.place_id)
-      let row = table.insertRow()
-      // Name
-      let nameCell = row.insertCell()
-      nameCell.innerHTML = place.alias === undefined ? place.name : place.alias;
+      this.debugLog('Place: ', place.name + ' (' + place.place_id + ')')
+      const row = table.insertRow()
+      // Name. textContent, not innerHTML: the name comes from Google or the config.
+      const nameCell = row.insertCell()
+      nameCell.textContent = place.alias === undefined ? place.name : place.alias
       nameCell.className = 'bright'
+
       // Opening hours
-
-      let openCell = row.insertCell()
+      const openCell = row.insertCell()
       openCell.style = 'padding-left: 8px;'
-      if (place.opening_hours !== undefined) {
-        if (!isAlwaysOpen(place)) {
-          let openCellTable = document.createElement('table')
-          const currentTime = moment() // this.config.mockData ? moment('21:00', 'HH:mm') : moment()
-          debugLog('Moment now: ', currentTime.format('HH:mm'))
+      const currentTime = moment()
+      const state = hasPeriods(place) && !isAlwaysOpen(place)
+        ? getOpeningState(place.opening_hours.periods, currentTime)
+        : undefined
 
-          const opening_hours = parse_opening_hours(place.opening_hours.periods)
-          debugLog('Periods parsed: ', JSON.stringify(opening_hours))
-
-          const [openingTime, closingTime, placeIsOpen] = calculateOpeningHours(opening_hours, currentTime);
-
-          // Text
-          let openTextCell = openCellTable.insertRow()
-          openTextCell.innerHTML = placeIsOpen ? this.translate('OPEN') : this.translate('CLOSED')
-          openTextCell.className = 'xsmall'
-          openTextCell.style = placeIsOpen ? 'color: green;' : 'color: red;'
-
-          // Hours
-          let openingHoursCell = openCellTable.insertRow()
-          openingHoursCell.className = 'xsmall'
-          // Show time until closing/opening
-          if (this.config.styling.showTimeUntil) {
-            if (placeIsOpen) {
-              let timeUntilClosing = moment.duration(closingTime.diff(currentTime)).humanize()
-              openingHoursCell.innerHTML = this.translate('CLOSES_IN', { 'timeUntilClosing': timeUntilClosing })
-            } else {
-              let timeUntilOpen = moment.duration(currentTime.diff(openingTime)).humanize()
-              openingHoursCell.innerHTML = this.translate('OPENS_IN', { 'timeUntilOpen': timeUntilOpen })
-
-            }
-            // Show only time when closing/opening
-          } else {
-            if (placeIsOpen) {
-              openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + closingTime.format('HH:mm')
-            } else {
-              openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + openingTime.format('HH:mm')
-            }
-          }
-
-          openCell.appendChild(openCellTable)
-        } else {
-          openCell.innerHTML = this.translate('ALWAYS_OPEN')
-        }
-      } else {
+      if (isAlwaysOpen(place)) {
+        openCell.innerHTML = this.translate('ALWAYS_OPEN')
+      } else if (state === undefined) {
         openCell.innerHTML = this.translate('NOT_AVAILABLE')
+      } else {
+        this.debugLog('Opening state: ', JSON.stringify(state))
+        const openCellTable = document.createElement('table')
+
+        // Text
+        const openTextCell = openCellTable.insertRow()
+        openTextCell.innerHTML = state.isOpen ? this.translate('OPEN') : this.translate('CLOSED')
+        openTextCell.className = 'xsmall'
+        openTextCell.style = state.isOpen ? 'color: green;' : 'color: red;'
+
+        // Hours
+        const openingHoursCell = openCellTable.insertRow()
+        openingHoursCell.className = 'xsmall'
+        if (this.config.styling.showTimeUntil) {
+          // Show time until closing/opening
+          if (state.isOpen) {
+            const timeUntilClosing = moment.duration(state.closingTime.diff(currentTime)).humanize()
+            openingHoursCell.innerHTML = this.translate('CLOSES_IN', { timeUntilClosing: timeUntilClosing })
+          } else if (state.openingTime !== undefined) {
+            const timeUntilOpen = moment.duration(state.openingTime.diff(currentTime)).humanize()
+            openingHoursCell.innerHTML = this.translate('OPENS_IN', { timeUntilOpen: timeUntilOpen })
+          }
+        } else {
+          // Show only time when closing/opening
+          if (state.isOpen) {
+            openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + state.closingTime.format(timeFormat)
+          } else if (state.openingTime !== undefined) {
+            openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + state.openingTime.format(timeFormat)
+          }
+        }
+        openCell.appendChild(openCellTable)
       }
     })
     container.appendChild(table)
@@ -164,7 +155,7 @@ Module.register('MMM-OpeningHours', {
   },
 
   socketNotificationReceived: function (notification, payload) {
-    debugLog('Notification - ', notification)
+    this.debugLog('Notification - ', notification)
     if (notification === 'PLACES_UPDATE') {
       this.loaded = true
       this.failure = undefined
@@ -178,20 +169,10 @@ Module.register('MMM-OpeningHours', {
       this.updateDom()
     }
   },
-})
 
-function debugLog (msg, object) {
-  if (config.debug) {
-    Log.log(
-      '[' +
-      new Date(Date.now()).toLocaleTimeString() +
-      '] - DEBUG - ' +
-      this.name +
-      ' - ' +
-      new Error().lineNumber +
-      ' - : ' +
-      msg, object
-    )
+  debugLog: function (msg, object) {
+    if (this.config.debug) {
+      Log.log('[' + new Date(Date.now()).toLocaleTimeString() + '] - DEBUG - ' + this.name + ' : ' + msg, object)
+    }
   }
-}
-
+})
