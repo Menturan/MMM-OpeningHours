@@ -10,5 +10,6 @@
   "OPENS_IN": "Opens in {timeUntilOpen}",
   "CLOSES_IN": "Closes in {timeUntilClosing}",
   "NOT_AVAILABLE": "N/A",
-  "ALWAYS_OPEN": "Always open"
+  "ALWAYS_OPEN": "Always open",
+  "TOMORROW": "tomorrow"
 }

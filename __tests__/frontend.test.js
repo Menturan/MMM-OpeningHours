@@ -62,3 +62,59 @@ test('showTimeUntil shows a positive duration until opening', () => {
 test('French translation file is registered under "fr"', () => {
   expect(definition.getTranslations().fr).toBe('translations/fr.json')
 })
+
+// 2019-06-04 is a Tuesday (day 2).
+const weekly = (name, ...periods) => ({
+  place_id: name,
+  name,
+  opening_hours: { periods: periods.map(([od, ot, cd, ct]) => ({ open: { day: od, time: ot }, close: { day: cd, time: ct } })) }
+})
+
+test('names the day when the next opening is not today', () => {
+  const rows = render([
+    weekly('Later today', [2, '1200', 2, '1700']),
+    weekly('Tomorrow', [3, '0900', 3, '1700']),
+    weekly('Friday', [5, '0900', 5, '1700'])
+  ], {}, '2019-06-04T10:00')
+  expect(rows).toEqual([
+    ['Later today', 'ClosedOpens 12:00'],
+    ['Tomorrow', 'ClosedOpens tomorrow 09:00'],
+    ['Friday', 'ClosedOpens Fri 09:00']
+  ])
+})
+
+test('closing after midnight shows only the time; closing days away names the day', () => {
+  const rows = render([
+    weekly('Night club', [2, '2000', 3, '0200']),
+    weekly('Long stretch', [1, '0800', 4, '2000'])
+  ], {}, '2019-06-04T21:00')
+  expect(rows).toEqual([
+    ['Night club', 'OpenCloses 02:00'],
+    ['Long stretch', 'OpenCloses Thu 20:00']
+  ])
+})
+
+test('SERVICE_FAILURE keeps showing the last known opening hours', () => {
+  const module = Object.create(definition)
+  module.config = { ...definition.defaults }
+  module.updateDom = () => {}
+  module.socketNotificationReceived('PLACES_UPDATE', [newPlace('normal.json')])
+  module.socketNotificationReceived('SERVICE_FAILURE', 'Google Places API: offline')
+  expect(module.failure).toBeUndefined()
+  expect(module.placesOpeningHours).toHaveLength(1)
+})
+
+test('SERVICE_FAILURE without earlier data shows the error', () => {
+  const module = Object.create(definition)
+  module.config = { ...definition.defaults }
+  module.updateDom = () => {}
+  module.socketNotificationReceived('SERVICE_FAILURE', 'Google Places API: offline')
+  expect(module.failure).toBe('Google Places API: offline')
+})
+
+test('every translation file has the same keys as English', () => {
+  const en = Object.keys(require('../translations/en.json')).sort()
+  Object.keys(definition.getTranslations()).forEach(lang => {
+    expect([lang, Object.keys(require('../translations/' + lang + '.json')).sort()]).toEqual([lang, en])
+  })
+})

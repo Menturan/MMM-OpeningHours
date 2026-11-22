@@ -1,7 +1,7 @@
 {
   "HEADER": "Öppettider",
   "LOADING_MODULE": "Laddar öppettider...",
-  "NO_API_KEY_PROVIDED": "API-nyckel fattas.",
+  "NO_API_KEY_PROVIDED": "API-nyckel saknas.",
   "NO_PLACES_PROVIDED": "Inga platser tillagda.",
   "CLOSED": "Stängt",
   "CLOSES": "Stänger",
@@ -10,5 +10,6 @@
   "OPENS_IN": "Öppnar om {timeUntilOpen}",
   "CLOSES_IN": "Stänger om {timeUntilClosing}",
   "NOT_AVAILABLE": "N/A",
-  "ALWAYS_OPEN": "Dygnet runt"
+  "ALWAYS_OPEN": "Dygnet runt",
+  "TOMORROW": "imorgon"
 }

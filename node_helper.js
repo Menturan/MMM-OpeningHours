@@ -4,6 +4,9 @@ const path = require('path')
 const util = require('./backendUtil')
 const placesApi = require('./placesApi')
 
+// Delays before retrying after a failed fetch. The last one repeats until a fetch succeeds.
+const RETRY_DELAYS = [60 * 1000, 5 * 60 * 1000, 30 * 60 * 1000]
+
 module.exports = NodeHelper.create({
 
   start: function () {
@@ -11,6 +14,32 @@ module.exports = NodeHelper.create({
     this.config = { debug: false }
     this.places = undefined
     this.updateTimer = undefined
+    this.retryTimer = undefined
+    this.retryCount = 0
+  },
+
+  // Called after each fetch. Any failure schedules a retry with backoff, so a
+  // short network outage does not leave the module broken until the next scheduled update.
+  scheduleRetry: function (failed) {
+    clearTimeout(this.retryTimer)
+    this.retryTimer = undefined
+    if (!failed) {
+      this.retryCount = 0
+      return
+    }
+    const delay = RETRY_DELAYS[Math.min(this.retryCount, RETRY_DELAYS.length - 1)]
+    this.retryCount++
+    this.log('Retrying in ' + Math.round(delay / 60000) + ' min.')
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = undefined
+      this.getOpeningHours().catch(error => this.log('Unexpected error: ', error))
+    }, delay)
+  },
+
+  // The last successfully fetched data for a place, if any.
+  cachedPlace: function (placeId) {
+    if (!Array.isArray(this.places)) return undefined
+    return this.places.find(p => p && p.place_id === placeId && !p.error)
   },
 
   scheduleUpdate: function () {
@@ -51,12 +80,17 @@ module.exports = NodeHelper.create({
       result = settled.map((outcome, index) => {
         if (outcome.status === 'fulfilled') return outcome.value
         this.log('Error fetching place ' + placeIds[index] + ': ', outcome.reason && outcome.reason.message)
-        // Keep the row so the user can see which place failed. The frontend shows it as N/A.
+        // Keep showing the last known hours for this place, if there are any.
+        const cached = this.cachedPlace(placeIds[index])
+        if (cached) return cached
+        // Otherwise keep the row so the user can see which place failed. The frontend shows it as N/A.
         return { place_id: placeIds[index], name: placeIds[index], opening_hours: undefined, error: true }
       })
+      const failed = settled.some(outcome => outcome.status === 'rejected')
+      this.scheduleRetry(failed)
 
       if (result.length > 0 && result.every(p => p.error)) {
-        const reason = settled[0].reason
+        const reason = settled.find(outcome => outcome.status === 'rejected').reason
         this.sendSocketNotification('SERVICE_FAILURE', 'Google Places API: ' + (reason && reason.message))
         return
       }

@@ -139,9 +139,11 @@ Module.register('MMM-OpeningHours', {
         } else {
           // Show only time when closing/opening
           if (state.isOpen) {
-            openingHoursCell.innerHTML = this.translate('CLOSES') + ' ' + state.closingTime.format(timeFormat)
+            // Closing after midnight reads fine without a day. Only name the day when it is more than 24h away.
+            const showDay = state.closingTime.diff(currentTime, 'hours', true) >= 24
+            openingHoursCell.textContent = this.translate('CLOSES') + ' ' + this.formatTime(state.closingTime, currentTime, timeFormat, showDay)
           } else if (state.openingTime !== undefined) {
-            openingHoursCell.innerHTML = this.translate('OPENS') + ' ' + state.openingTime.format(timeFormat)
+            openingHoursCell.textContent = this.translate('OPENS') + ' ' + this.formatTime(state.openingTime, currentTime, timeFormat, true)
           }
         }
         openCell.appendChild(openCellTable)
@@ -154,6 +156,17 @@ Module.register('MMM-OpeningHours', {
     return wrapper
   },
 
+  // 'HH:mm' today, 'tomorrow HH:mm' tomorrow, otherwise 'Mon HH:mm' (weekday in the configured language).
+  formatTime: function (time, currentTime, timeFormat, showDay) {
+    const clock = time.format(timeFormat)
+    if (!showDay) return clock
+    const today = currentTime.clone().startOf('day')
+    const days = time.clone().startOf('day').diff(today, 'days')
+    if (days === 0) return clock
+    if (days === 1) return this.translate('TOMORROW') + ' ' + clock
+    return time.format('ddd') + ' ' + clock
+  },
+
   socketNotificationReceived: function (notification, payload) {
     this.debugLog('Notification - ', notification)
     if (notification === 'PLACES_UPDATE') {
@@ -163,6 +176,11 @@ Module.register('MMM-OpeningHours', {
       this.updateDom()
     }
     if (notification === 'SERVICE_FAILURE') {
+      // Keep showing the last known hours rather than replacing them with an error.
+      if (this.placesOpeningHours !== undefined) {
+        Log.log('Service failure, keeping last known opening hours: ', payload)
+        return
+      }
       this.failure = payload
       this.loaded = true
       Log.log('Service failure: ', this.failure)
