@@ -1,5 +1,5 @@
 const moment = require('moment')
-const { getOpeningState } = require('../OpeningHoursLogic.js')
+const { getOpeningState, getTodaysIntervals, placeTime } = require('../OpeningHoursLogic.js')
 const { normalizePlaceLegacy, normalizePlaceNew } = require('../placesApi.js')
 const { getPlaceFromFile } = require('../testUtil.js')
 
@@ -130,5 +130,62 @@ describe('Dated periods from currentOpeningHours (holidays)', () => {
     const state = getOpeningState(periods, at('2026-12-21T07:00'))
     expect(state.isOpen).toBe(false)
     expect(state.openingTime.format('YYYY-MM-DD HH:mm')).toBe('2026-12-21 09:00')
+  })
+})
+
+describe('places in another time zone (utcOffsetMinutes)', () => {
+  // Tests run in UTC (jest.config.js). Open Tuesday 09-17 local time.
+  const periods = [{ open: { day: 2, time: '0900' }, close: { day: 2, time: '1700' } }]
+
+  test('weekly hours are read in the place\'s own time', () => {
+    // Tue 01:00 UTC = Tue 10:00 at UTC+9.
+    const state = getOpeningState(periods, at('2019-06-04T01:00'), 540)
+    expect(state.isOpen).toBe(true)
+    expect(state.closingTime.format('ddd HH:mm Z')).toBe('Tue 17:00 +09:00')
+    // Without the offset the same moment is Tue 01:00, closed.
+    expect(getOpeningState(periods, at('2019-06-04T01:00')).isOpen).toBe(false)
+  })
+
+  test('the place\'s weekday can differ from the mirror\'s', () => {
+    // Mon 23:30 UTC = Tue 08:30 at UTC+9: opens in 30 minutes, the same day for the place.
+    const state = getOpeningState(periods, at('2019-06-03T23:30'), 540)
+    expect(state.isOpen).toBe(false)
+    expect(state.openingTime.format('YYYY-MM-DD HH:mm')).toBe('2019-06-04 09:00')
+  })
+
+  test('dated periods are read in the place\'s own time', () => {
+    const dated = [{ open: { day: 2, time: '0900', date: '2019-06-04' }, close: { day: 2, time: '1700', date: '2019-06-04' } }]
+    const state = getOpeningState(dated, at('2019-06-04T07:59'), 540) // 16:59 at UTC+9
+    expect(state.isOpen).toBe(true)
+    expect(state.closingTime.diff(at('2019-06-04T07:59'), 'minutes')).toBe(1)
+  })
+
+  test('the same offset as the mirror uses the local time zone (keeps daylight saving)', () => {
+    const now = at('2019-06-04T10:00')
+    expect(placeTime(now, now.utcOffset()).utcOffset()).toBe(now.utcOffset())
+    expect(placeTime(now, undefined).valueOf()).toBe(now.valueOf())
+  })
+})
+
+describe('getTodaysIntervals', () => {
+  const span = i => i.open.format('ddd HH:mm') + '-' + i.close.format('ddd HH:mm')
+
+  test('lists today\'s intervals, split by a break', () => {
+    const periods = [
+      { open: { day: 2, time: '0900' }, close: { day: 2, time: '1200' } },
+      { open: { day: 2, time: '1300' }, close: { day: 2, time: '1800' } },
+      { open: { day: 3, time: '0900' }, close: { day: 3, time: '1800' } }
+    ]
+    expect(getTodaysIntervals(periods, at('2019-06-04T08:00')).map(span)).toEqual(['Tue 09:00-Tue 12:00', 'Tue 13:00-Tue 18:00'])
+  })
+
+  test('includes last night\'s period only while it is still open', () => {
+    const periods = legacyPeriods('open_some_days.json') // Thu-Sat 22-03
+    expect(getTodaysIntervals(periods, at('2019-06-09T01:00')).map(span)).toEqual(['Sat 22:00-Sun 03:00'])
+    expect(getTodaysIntervals(periods, at('2019-06-09T15:00'))).toEqual([])
+  })
+
+  test('undefined when there are no usable periods', () => {
+    expect(getTodaysIntervals([], at('2019-06-04T08:00'))).toBeUndefined()
   })
 })

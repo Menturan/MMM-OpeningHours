@@ -1,0 +1,22 @@
+/*
+ * MMM-OpeningHours. Override any of these in MagicMirror's css/custom.css.
+ */
+.MMM-OpeningHours-wrapper {
+  width: fit-content;
+}
+
+.MMM-OpeningHours-hours {
+  padding-left: 8px;
+}
+
+.MMM-OpeningHours-open {
+  color: green;
+}
+
+.MMM-OpeningHours-closed {
+  color: red;
+}
+
+.MMM-OpeningHours-closing-soon {
+  color: orange;
+}

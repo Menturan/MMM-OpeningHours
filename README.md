@@ -37,13 +37,17 @@ Google's own guide: [Use API keys](https://developers.google.com/maps/documentat
 
 **Opening hours are a billed field. Contributors to this module are not responsible for any charges.**
 
-The module asks for the fields `id`, `displayName`, `currentOpeningHours` and `regularOpeningHours`.
+The module asks for the fields `id`, `displayName`, `utcOffsetMinutes`, `currentOpeningHours` and `regularOpeningHours`.
 The opening hours fields put each request in the **Place Details Enterprise** SKU. Each place costs
 one request per `scheduleTime` (default once every 24 hours), and the module does not fetch again when the
 browser reloads. With the default schedule, 5 places is about 150 requests a month.
 Check [Places API usage and billing](https://developers.google.com/maps/documentation/places/web-service/usage-and-billing)
 for current prices and free usage caps. Setting a [quota](https://console.cloud.google.com/apis/api/places.googleapis.com/quotas)
 on the API is a cheap safety net.
+
+If a fetch fails, the module keeps showing the last known hours and retries after 1, 5 and 30 minutes,
+then every 30 minutes until it succeeds. Each retry is billed like a normal request. A failure that never
+clears, such as an invalid API key, adds about 48 requests per place per day.
 
 ### Existing projects with Places API (Legacy)
 
@@ -76,6 +80,8 @@ Place IDs work the same in the legacy and the new API, so existing configs keep 
 | scheduleTime | _milliseconds_    | No       | 86400000 (24h)    | Time between fetching place data from Google.                                                                                                                                                           |
 | timeFormat   | _number_          | No       | config.timeFormat | 24h, 12h. If not specified, uses same as parent config.                                                                                                                                                 |
 | language     | _ISO 639-1  code_ | No       | config.language   | Changes the translation. Time and date is still locale. Two letter country code. [ISO 639-1 code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes). If not specified, uses same as parent config. |
+| hideClosed   | _boolean_         | No       | false             | Hide places that are closed right now. Places that are always open or have no hours are still shown. |
+| sortOpenFirst | _boolean_        | No       | false             | Show open places first, then closed ones, then places without hours. The order from `places` is kept within each group. |
 | styling      | _object_          | No       | See next table.   | Configure table style.
 | useLegacyApi | _boolean_         | No       | false             | Use Places API (Legacy) instead of Places API (New). Only for Cloud projects that already have the legacy API enabled. |
 | debug        | _boolean_         | No       | false             | Debug output.                                                                                                                                                                                           |
@@ -93,6 +99,14 @@ If you would like to use an alias for a place you put the place id and the alias
 | showTimeUntil | _boolean_ | No       | false   | Show time until close/open instead of time when closed/open.          |
 | textAlign     | _string_  | No       | center  | Table text alignment. Possible values: left, right, center.           |
 | size          | _string_  | No       | small   | Size of table. Possible values: xsmall, small, medium. large, xlarge. |
+| showTodaysHours | _boolean_ | No    | false   | Add a row with all of today's hours, e.g. "Today: 09:00–12:00, 13:00–18:00". |
+| closingSoonMinutes | _number_ | No   | 30      | Show "Open" in orange this many minutes before closing. `0` turns it off. |
+
+Colors and spacing come from `MMM-OpeningHours.css`. Override the classes `MMM-OpeningHours-open`,
+`MMM-OpeningHours-closed` and `MMM-OpeningHours-closing-soon` in MagicMirror's `css/custom.css` to change them.
+
+When the next opening is not today, the module names the day: "Opens tomorrow 09:00" or "Opens Fri 09:00".
+Places in another time zone show their own local times. The module gets each place's UTC offset from Google.
 
 
 ## Example config
@@ -115,8 +129,11 @@ If you would like to use an alias for a place you put the place id and the alias
 
 ```bash
 npm install
+npm run lint
 npm test
 ```
+
+You can use several instances of the module at once, for example with different places in different positions.
 
 The tests never call Google. They use recorded responses in `mock_data/` (Places API (Legacy)) and
 `mock_data/places_new/` (Places API (New)). Add a file there to cover a new case; with `mockData: true` the

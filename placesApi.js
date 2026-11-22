@@ -8,6 +8,7 @@
  *   {
  *     place_id: 'ChIJ...',
  *     name: 'Some store',
+ *     utc_offset_minutes: 60,     // undefined if Google did not return it
  *     opening_hours: {            // undefined if Google has no hours
  *       periods: [{ open: { day: 0-6, time: 'HHmm', date? }, close: { day, time, date? } }]
  *     }
@@ -28,16 +29,23 @@ const PLACES_LEGACY_URL = 'https://maps.googleapis.com/maps/api/place/details/js
  * highest SKU of any field in the mask, so keep this list as short as possible.
  *   - id                   -> Place Details Essentials (IDs Only)
  *   - displayName          -> Place Details Pro
+ *   - utcOffsetMinutes     -> Place Details Pro
  *   - currentOpeningHours  -> Place Details Enterprise
  *   - regularOpeningHours  -> Place Details Enterprise
  * The opening hours fields put every request in the Enterprise SKU. Since that
  * SKU is unavoidable for this module, requesting both hours fields costs the
  * same as requesting one. Do not add fields that are not rendered.
  */
-const PLACES_NEW_FIELD_MASK = 'id,displayName,currentOpeningHours,regularOpeningHours'
+const PLACES_NEW_FIELD_MASK = 'id,displayName,utcOffsetMinutes,currentOpeningHours,regularOpeningHours'
 
-// Legacy equivalent. 'opening_hours' is a Contact Data field in the legacy billing model.
-const PLACES_LEGACY_FIELDS = 'name,opening_hours,place_id'
+// Legacy equivalent. 'opening_hours' is a Contact Data field in the legacy billing
+// model; 'utc_offset' is a Basic Data field and adds no charge.
+const PLACES_LEGACY_FIELDS = 'name,opening_hours,place_id,utc_offset'
+
+// A request that takes longer than this is aborted and counted as failed (and retried).
+const FETCH_TIMEOUT_MS = 15000
+
+const offsetOrUndefined = value => typeof value === 'number' ? value : undefined
 
 function pad2 (n) {
   return String(n).padStart(2, '0')
@@ -73,6 +81,7 @@ function normalizePlaceNew (place) {
   return {
     place_id: place.id,
     name: place.displayName ? place.displayName.text : place.id,
+    utc_offset_minutes: offsetOrUndefined(place.utcOffsetMinutes),
     opening_hours: hours === undefined
       ? undefined
       : {
@@ -88,6 +97,7 @@ function normalizePlaceLegacy (result) {
   return {
     place_id: result.place_id,
     name: result.name,
+    utc_offset_minutes: offsetOrUndefined(result.utc_offset_minutes !== undefined ? result.utc_offset_minutes : result.utc_offset),
     opening_hours: result.opening_hours && Array.isArray(result.opening_hours.periods) &&
       result.opening_hours.periods.length > 0
       ? { periods: result.opening_hours.periods }
@@ -99,6 +109,7 @@ async function fetchPlaceNew (placeId, apiKey, language, fetchImpl = fetch) {
   const url = PLACES_NEW_URL + encodeURIComponent(placeId) +
     (language ? '?languageCode=' + encodeURIComponent(language) : '')
   const response = await fetchImpl(url, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     headers: {
       'X-Goog-Api-Key': apiKey,
       'X-Goog-FieldMask': PLACES_NEW_FIELD_MASK
@@ -115,7 +126,9 @@ async function fetchPlaceNew (placeId, apiKey, language, fetchImpl = fetch) {
 async function fetchPlaceLegacy (placeId, apiKey, language, fetchImpl = fetch) {
   const params = new URLSearchParams({ place_id: placeId, fields: PLACES_LEGACY_FIELDS, key: apiKey })
   if (language) params.set('language', language)
-  const response = await fetchImpl(PLACES_LEGACY_URL + '?' + params.toString())
+  const response = await fetchImpl(PLACES_LEGACY_URL + '?' + params.toString(), {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
+  })
   const body = await response.json().catch(() => ({}))
   if (!response.ok || body.status !== 'OK') {
     throw new Error('Places API (Legacy) ' + (body.status || response.status) +
@@ -126,6 +139,7 @@ async function fetchPlaceLegacy (placeId, apiKey, language, fetchImpl = fetch) {
 
 module.exports = {
   PLACES_NEW_FIELD_MASK,
+  FETCH_TIMEOUT_MS,
   normalizePlaceNew,
   normalizePlaceLegacy,
   fetchPlaceNew,
