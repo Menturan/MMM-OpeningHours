@@ -66,8 +66,15 @@ describe('fetchPlaceNew', () => {
     const { url, options } = fetchImpl.calls[0]
     expect(url).toBe('https://places.googleapis.com/v1/places/normal-id?languageCode=sv')
     expect(options.headers['X-Goog-Api-Key']).toBe('KEY')
-    expect(options.headers['X-Goog-FieldMask']).toBe('id,displayName,currentOpeningHours,regularOpeningHours')
+    expect(options.headers['X-Goog-FieldMask']).toBe('id,displayName,utcOffsetMinutes,currentOpeningHours,regularOpeningHours')
     expect(url).not.toContain('KEY')
+    expect(options.signal).toBeInstanceOf(AbortSignal)
+  })
+
+  test('maps utcOffsetMinutes', async () => {
+    const fetchImpl = fakeFetch(200, { ...newMock('normal.json'), utcOffsetMinutes: 120 })
+    expect((await placesApi.fetchPlaceNew('id', 'KEY', 'en', fetchImpl)).utc_offset_minutes).toBe(120)
+    expect(placesApi.normalizePlaceNew(newMock('normal.json')).utc_offset_minutes).toBeUndefined()
   })
 
   test('throws with the Google error message on HTTP errors', async () => {
@@ -85,7 +92,13 @@ describe('fetchPlaceLegacy', () => {
     const url = new URL(fetchImpl.calls[0].url)
     expect(url.origin + url.pathname).toBe('https://maps.googleapis.com/maps/api/place/details/json')
     expect(url.searchParams.get('place_id')).toBe('uber-id')
-    expect(url.searchParams.get('fields')).toBe('name,opening_hours,place_id')
+    expect(url.searchParams.get('fields')).toBe('name,opening_hours,place_id,utc_offset')
+    expect(fetchImpl.calls[0].options.signal).toBeInstanceOf(AbortSignal)
+  })
+
+  test('maps utc_offset (and utc_offset_minutes if present)', () => {
+    expect(placesApi.normalizePlaceLegacy({ place_id: 'a', name: 'A', utc_offset: 60 }).utc_offset_minutes).toBe(60)
+    expect(placesApi.normalizePlaceLegacy({ place_id: 'a', name: 'A', utc_offset_minutes: -300 }).utc_offset_minutes).toBe(-300)
   })
 
   test('throws on a non-OK status in the body', async () => {
