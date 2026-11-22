@@ -1,0 +1,57 @@
+{
+  "id": "ChIJs4cQo1ydX0YRkoCF1aFt_YA",
+  "displayName": {
+    "text": "Sturecompagniet",
+    "languageCode": "en"
+  },
+  "regularOpeningHours": {
+    "openNow": false,
+    "periods": [
+      {
+        "open": {
+          "day": 4,
+          "hour": 22,
+          "minute": 0
+        },
+        "close": {
+          "day": 5,
+          "hour": 3,
+          "minute": 0
+        }
+      },
+      {
+        "open": {
+          "day": 5,
+          "hour": 22,
+          "minute": 0
+        },
+        "close": {
+          "day": 6,
+          "hour": 3,
+          "minute": 0
+        }
+      },
+      {
+        "open": {
+          "day": 6,
+          "hour": 22,
+          "minute": 0
+        },
+        "close": {
+          "day": 0,
+          "hour": 3,
+          "minute": 0
+        }
+      }
+    ],
+    "weekdayDescriptions": [
+      "Monday: Closed",
+      "Tuesday: Closed",
+      "Wednesday: Closed",
+      "Thursday: 22:00 – 03:00",
+      "Friday: 22:00 – 03:00",
+      "Saturday: 22:00 – 03:00",
+      "Sunday: Closed"
+    ]
+  }
+}

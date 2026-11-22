@@ -1,118 +1,102 @@
-var moment = require('moment')
 const NodeHelper = require('node_helper')
-var google = require('@google/maps')
-var fs = require('fs')
-var util = require("./backendUtil")
-
-var googleClient = undefined
+const fs = require('fs')
+const path = require('path')
+const util = require('./backendUtil')
+const placesApi = require('./placesApi')
 
 module.exports = NodeHelper.create({
 
-    start: function () {
-        var self = this
-        self.log('Starting helper: ', this.name)
-        this.started = false
-    },
+  start: function () {
+    this.log('Starting helper: ', this.name)
+    this.config = { debug: false }
+    this.places = undefined
+    this.updateTimer = undefined
+  },
 
-    scheduleUpdate: function () {
-        var self = this
-        this.updatetimer = setInterval(function () {
-            self.getOpeningHours()
-        }, this.config.scheduleTime) // 1min
-    },
+  scheduleUpdate: function () {
+    clearInterval(this.updateTimer)
+    this.updateTimer = setInterval(() => this.getOpeningHours(), this.config.scheduleTime)
+  },
 
-    mockGooglePlacesApi(self, index) {
-        self.log('Using mock data.')
-        return new Promise(function (resolve, reject) {
-            const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
-            const file = files[index];
-            const data = fs.readFileSync('./modules/MMM-OpeningHours/mock_data/' + file, 'utf8');
-            resolve({
-                json: JSON.parse(data)
-            }).catch((error) => {
-                reject(error);
-            })
-        })
-    },
+  readMockPlaces: function () {
+    // Mock files hold recorded API responses: legacy ones in mock_data/, Places API (New) ones in mock_data/places_new/.
+    const dir = this.config.useLegacyApi
+      ? path.join(__dirname, 'mock_data')
+      : path.join(__dirname, 'mock_data', 'places_new')
+    return fs.readdirSync(dir)
+      .filter(file => file.endsWith('.json'))
+      .sort()
+      .map(file => {
+        const json = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'))
+        return this.config.useLegacyApi
+          ? placesApi.normalizePlaceLegacy(json.result)
+          : placesApi.normalizePlaceNew(json)
+      })
+  },
 
-    getOpeningHours: function () {
-        var self = this
-        self.log('Fetching opening hours')
-        let places = this.config.places;
-        if (this.config.mockData) {
-            const files = fs.readdirSync('./modules/MMM-OpeningHours/mock_data')
-            places = Array.from('x'.repeat(files.length));
-        }
-        let opening_hours_promises = places.map((place, index) => {
-            if (Array.isArray(place)) {
-                place = place[0] // place=[placeid, placename]
-            }
-            let googlePromise
-            if (this.config.mockData) {
-                googlePromise = self.mockGooglePlacesApi(self, index)
-            } else {
-                self.log('Using Google Places API.')
-                googlePromise = googleClient.place({
-                    placeid: place === null ? '' : place,
-                    fields: ['name', 'opening_hours', 'place_id'],
-                }).asPromise()
-            }
-            self.debugLog('googlePromise - ', googlePromise)
-            return googlePromise.then(function (response) {
-                self.debugLog('Response - ', JSON.stringify(response))
-                // self.debugLog('Response.json.result - ', response.json.result)
-                return response.json.result
-            }).catch(function (error) {
-                self.log(': Error: ', error)
-                // self.sendSocketNotification('SERVICE_FAILURE', error)
-            })
-        })
+  fetchPlace: function (placeId) {
+    const fetchPlace = this.config.useLegacyApi ? placesApi.fetchPlaceLegacy : placesApi.fetchPlaceNew
+    return fetchPlace(placeId, this.config.googleApiKey, this.config.language)
+  },
 
-        Promise.all(opening_hours_promises).then(function (result) {
-            this.places = util.replacePlaceNamesWithUsersOwnAlias(result, places);
+  getOpeningHours: async function () {
+    let result
+    if (this.config.mockData) {
+      this.log('Using mock data.')
+      result = this.readMockPlaces()
+    } else {
+      this.log('Fetching opening hours from Google Places API ' + (this.config.useLegacyApi ? '(Legacy)' : '(New)'))
+      const placeIds = this.config.places.map(util.getPlaceId)
+      const settled = await Promise.allSettled(placeIds.map(id => this.fetchPlace(id)))
+      result = settled.map((outcome, index) => {
+        if (outcome.status === 'fulfilled') return outcome.value
+        this.log('Error fetching place ' + placeIds[index] + ': ', outcome.reason && outcome.reason.message)
+        // Keep the row so the user can see which place failed. The frontend shows it as N/A.
+        return { place_id: placeIds[index], name: placeIds[index], opening_hours: undefined, error: true }
+      })
 
-            self.debugLog('Sending to frontend - ', JSON.stringify(this.places))
-            self.sendSocketNotification('PLACES_UPDATE', result)
-        })
-
-    },
-
-// --------------------------------------- Handle notifications
-    socketNotificationReceived: function (notification, payload) {
-        var self = this
-        this.config = payload
-        self.debugLog('Notification - ' + notification)
-        self.debugLog('Started - ' + this.started)
-        self.debugLog('Config - ', this.config)
-        if (notification === 'SETUP') {
-            this.config = payload
-            if (!this.config.mockData) {
-                if (this.started === false) {
-                    moment.locale(this.config.language)
-                    googleClient = google.createClient({
-                        key: this.config.googleApiKey,
-                        Promise: Promise,
-                        language: this.config.language
-                    })
-                    self.scheduleUpdate()
-                }
-            }
-            this.started = true
-            self.getOpeningHours()
-        } else {
-            self.sendSocketNotification('PLACES_UPDATE', this.places)
-        }
-
+      if (result.length > 0 && result.every(p => p.error)) {
+        const reason = settled[0].reason
+        this.sendSocketNotification('SERVICE_FAILURE', 'Google Places API: ' + (reason && reason.message))
+        return
+      }
+      util.replacePlaceNamesWithUsersOwnAlias(result, this.config.places)
     }
-    ,
-    log: function (msg, object) {
-        console.log('[' + (new Date(Date.now())).toLocaleTimeString() + '] - ' + this.name + ' : ' + msg, object === undefined ? '' : object)
+
+    this.places = result
+    this.debugLog('Sending to frontend - ', JSON.stringify(this.places))
+    this.sendSocketNotification('PLACES_UPDATE', this.places)
+  },
+
+  // --------------------------------------- Handle notifications
+  socketNotificationReceived: function (notification, payload) {
+    if (notification !== 'SETUP') return
+    this.config = payload
+    this.debugLog('Config - ', this.config)
+
+    // A browser reload sends SETUP again. Reuse cached data and keep the timer
+    // already running, so a reload does not trigger extra billed API calls.
+    if (this.places !== undefined && this.updateTimer !== undefined) {
+      this.sendSocketNotification('PLACES_UPDATE', this.places)
+      return
     }
-    ,
-    debugLog: function (msg, object) {
-        if (this.config.debug) {
-            console.log('[' + (new Date(Date.now())).toLocaleTimeString() + '] - DEBUG - ' + this.name + ' : ' + msg, object === undefined ? '' : object)
-        }
+    if (!this.config.mockData) {
+      this.scheduleUpdate()
     }
+    this.getOpeningHours().catch(error => {
+      this.log('Unexpected error: ', error)
+      this.sendSocketNotification('SERVICE_FAILURE', String(error && error.message))
+    })
+  },
+
+  log: function (msg, object) {
+    console.log('[' + (new Date(Date.now())).toLocaleTimeString() + '] - ' + this.name + ' : ' + msg, object === undefined ? '' : object)
+  },
+
+  debugLog: function (msg, object) {
+    if (this.config && this.config.debug) {
+      console.log('[' + (new Date(Date.now())).toLocaleTimeString() + '] - DEBUG - ' + this.name + ' : ' + msg, object === undefined ? '' : object)
+    }
+  }
 
 })

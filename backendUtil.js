@@ -1,26 +1,22 @@
-function replacePlaceNamesWithUsersOwnAlias(result, places) {
-    places.forEach((place) => {
-        if (Array.isArray(place)) {
-            const placeId = place[0];
-            const placeName = place[1];
-            let placeToGiveAlias = result.find(function (p) {
-                return placeId === p["place_id"];
-            });
-            placeToGiveAlias["alias"] = placeName
-        }
-    });
-    return result;
+/*
+ * Config entries are either 'placeId' or ['placeId', 'Alias'].
+ */
+function getPlaceId (placeConfig) {
+  return Array.isArray(placeConfig) ? placeConfig[0] : placeConfig
 }
 
-let isServerSide = true;
-
-try {
-    const dummy = window !== undefined;
-    isServerSide = false
-} catch (e) {
-    // Do nothing...
+function replacePlaceNamesWithUsersOwnAlias (result, places) {
+  places.forEach((place) => {
+    if (Array.isArray(place)) {
+      const placeId = place[0]
+      const placeName = place[1]
+      const placeToGiveAlias = result.find(p => p && placeId === p.place_id)
+      if (placeToGiveAlias) {
+        placeToGiveAlias.alias = placeName
+      }
+    }
+  })
+  return result
 }
 
-if (isServerSide) {
-    module.exports = {replacePlaceNamesWithUsersOwnAlias};
-}
+module.exports = { getPlaceId, replacePlaceNamesWithUsersOwnAlias }
