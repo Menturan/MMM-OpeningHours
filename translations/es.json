@@ -11,5 +11,7 @@
   "CLOSES_IN": "Cierra en {timeUntilClosing}",
   "TOMORROW": "mañana",
   "NOT_AVAILABLE": "N/D",
-  "ALWAYS_OPEN": "Siempre abierto"
+  "ALWAYS_OPEN": "Siempre abierto",
+  "TODAY": "Hoy",
+  "ALL_CLOSED": "Todo está cerrado"
 }

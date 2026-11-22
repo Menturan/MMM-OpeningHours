@@ -11,5 +11,7 @@
   "CLOSES_IN": "Stänger om {timeUntilClosing}",
   "NOT_AVAILABLE": "N/A",
   "ALWAYS_OPEN": "Dygnet runt",
-  "TOMORROW": "imorgon"
+  "TOMORROW": "imorgon",
+  "TODAY": "Idag",
+  "ALL_CLOSED": "Allt är stängt"
 }
